@@ -28,8 +28,11 @@ def read_raw_cont(spi):
     """
     read continously raw values from adc
     """
-    while(1):
-        print(read_raw(spi.readbytes(4)))
+    try:
+        while(1):
+            print(read_raw(spi.readbytes(4)))
+    except KeyboardInterrupt:
+        spi.close()
 
 def read_voltage(data, ref):
     """
@@ -42,18 +45,16 @@ def read_voltage_cont(spi, ref):
     """
     read continously voltage values from adc
     """
-    while(1):
-        print(read_voltage(spi.readbytes(4), ref))
+    try:
+        while(1):
+            print(read_voltage(spi.readbytes(4), ref))
+    except KeyboardInterrupt:
+        spi.close()
 
-def read_filtred():
-    pass
 
-def touch_detect(threshold):
-    pass
-
-def measure_data(path, spi):
+def measure_data_raw(path, spi):
     """
-    measure and save data from spi device into path
+    measure and save raw data from spi device into path
     """
     values = ''
     try:
@@ -64,22 +65,52 @@ def measure_data(path, spi):
             time.sleep(1)
 
     except KeyboardInterrupt:
+        # spi.close()
         with open(path, 'w') as out:
             out.write(values)
+
+def measure_data_voltage(path, ref, spi):
+    """
+    measure and save voltage data from spi device into path
+    """
+    values = ''
+    try:
+        while(1):
+            v = str(read_voltage(spi, ref))
+            values += '{0}\n'.format(v)
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        with open(path, 'w') as out:
+            out.write(values)
+
+def touch_detect(spi, ref, f_length, threshold, delay):
+    window = []
+
+    # initialize filter
+    for x in range(0,f_length):
+        window.append(spi.read_voltage(spi, ref))
+
+    try:
+        while(1):
+            window = [read_voltage(spi, ref)] + window
+            window.pop()
+            avg = sum(window)/f_length
+            if(avg >= threshold):
+                print("touch detected")
+                break
+            time.sleep(delay)
+
+    except KeyboardInterrupt:
+        pass
 
 
 if __name__ == '__main__':
     # spi = spidev.SpiDev()
     # spi.open(0, 0)
     # spi.max_speed_hz = 5000
-    # to_send = [0x01, 0x02, 0x03, 0x04]
-    # spi.writebytes(to_send)
 
     test0 = [47, 200, 4, 189] 
     test1 = [16, 26, 235, 189]
-    data = [0x0f, 0x02, 0x03, 0x04]
-    print(read_voltage(test0, 5))
-    # measure_data("test", test0)
-    # spi.close()
 
 

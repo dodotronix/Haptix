@@ -8,6 +8,10 @@
 #          |sign, stat| data,     | additional |
 #          |          | MSB first | bits,      |
 
+# change speed
+# |  OSR4  |  OSR3  |  OSR2  |  OSR1  |  OSR0  |
+# | 31-bit | 30-bit | 29-bit | 28-bit | 27-bit |
+
 import sys
 import time
 import spidev
@@ -53,13 +57,7 @@ def read_voltage_cont(spi, ref, delay):
     except KeyboardInterrupt:
         spi.close()
 
-def read_filtred():
-    pass
-
-def touch_detect(threshold):
-    pass
-
-def measure_data(path, spi, delay):
+def measure_data_raw(path, spi, delay):
     """
     measure and save data from spi device into path
     """
@@ -75,15 +73,65 @@ def measure_data(path, spi, delay):
         with open(path, 'w') as out:
             out.write(values)
 
+def measure_data_voltage(path, spi, ref, delay):
+    """
+    measure and save voltage data from spi device into path
+    """
+    values = ''
+    try:
+        while(1):
+            v = str(read_voltage(spi.readbytes(4), ref))
+            values += '{0}\n'.format(v)
+            time.sleep(delay)
+
+    except KeyboardInterrupt:
+        spi.close()
+        with open(path, 'w') as out:
+            out.write(values)
+
+def touch_detect(spi, ref, f_length, threshold, delay):
+    window = []
+
+    # initialize filter
+    for x in range(0,f_length+1):
+        window.append(read_voltage(spi.readbytes(4), ref))
+        time.sleep(delay)
+    window.pop(0) # flush first value
+
+    try:
+        while(1):
+            window = [read_voltage(spi.readbytes(4), ref)] + window
+            window.pop()
+            avg = sum(window)/f_length
+            print(avg)
+
+            # check threshold
+            if(avg >= threshold):
+                print("touch detected")
+                break
+            time.sleep(delay)
+
+    except KeyboardInterrupt:
+        spi.close()
+
 
 if __name__ == '__main__':
-    delay = 0.5 # s
+    freq = 500 # reading frequency [Hz]
+    delay = 1/freq # period [s]
+    ref = 5 # reference voltage [V]
+    filter_l = 20 # length of filter
+    threshold = 0.2 # [V]
+
     spi = spidev.SpiDev()
     spi.open(0, 0)
     spi.max_speed_hz = 5000
 
-    read_raw_cont(spi, delay)
-    # read_voltage_cont(spi, 5, delay)
-    # measure_data("raw_data.txt", spi, delay)
-    # print(read_voltage(test0, 5))
+    ## 3.52 kHz (datasheet)
+    # spi.writebytes([0x1<<4, 0x00, 0x00, 0x00])
+
+    # read_raw_cont(spi, delay)
+    # read_voltage_cont(spi, ref, delay)
+    # measure_data_raw("raw_data.txt", spi, delay)
+    # measure_data_voltage("volt_data.txt", spi, ref, delay)
+    touch_detect(spi, ref, filter_l, threshold, delay)
 
