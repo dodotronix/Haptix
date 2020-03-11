@@ -47,6 +47,7 @@ F 0 "U1" H 6144 3546 50  0000 L CNN
 F 1 "TLV6001DCK" H 6144 3455 50  0000 L CNN
 F 2 "Package_TO_SOT_SMD:SOT-353_SC-70-5" H 5900 3500 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tlv6001.pdf" H 5700 3500 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Texas-Instruments/TLV6001IDCKT?qs=sGAEpiMZZMtCHixnSjNA6DsogjI1ODGwCALif4qq3rk%3D" H 5700 3500 50  0001 C CNN "BOM"
 	1    5700 3500
 	1    0    0    -1  
 $EndComp
@@ -91,8 +92,9 @@ U 1 1 5E476409
 P 7050 2850
 F 0 "TP3" V 7004 3038 50  0000 L CNN
 F 1 "TestPoint" V 7095 3038 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 7250 2850 50  0001 C CNN
-F 3 "~" H 7250 2850 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 7250 2850 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 7250 2850 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5190TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzuVIMf8n14jKk%3D" V 7050 2850 50  0001 C CNN "BOM"
 	1    7050 2850
 	0    1    1    0   
 $EndComp
@@ -102,8 +104,9 @@ U 1 1 5E476A08
 P 7050 4350
 F 0 "TP5" V 7004 4538 50  0000 L CNN
 F 1 "TestPoint" V 7095 4538 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 7250 4350 50  0001 C CNN
-F 3 "~" H 7250 4350 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 7250 4350 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 7250 4350 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5197TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzuniTo7JD0ZPM%3D" V 7050 4350 50  0001 C CNN "BOM"
 	1    7050 4350
 	0    1    1    0   
 $EndComp
@@ -115,6 +118,7 @@ F 0 "C1" H 6918 3196 50  0000 L CNN
 F 1 "47u" H 6918 3105 50  0000 L CNN
 F 2 "Capacitor_SMD:CP_Elec_6.3x5.9" H 6838 3000 50  0001 C CNN
 F 3 "~" H 6800 3150 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Lelon/VE-470M1ETR-0605?qs=sGAEpiMZZMtZ1n0r9vR22edRdWtfW0D7lThG7OIR4Pw%3D" H 6800 3150 50  0001 C CNN "BOM"
 	1    6800 3150
 	1    0    0    -1  
 $EndComp
@@ -126,6 +130,7 @@ F 0 "C2" H 6682 3954 50  0000 R CNN
 F 1 "47u" H 6682 4045 50  0000 R CNN
 F 2 "Capacitor_SMD:CP_Elec_6.3x5.9" H 6838 3850 50  0001 C CNN
 F 3 "~" H 6800 4000 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Lelon/VE-470M1ETR-0605?qs=sGAEpiMZZMtZ1n0r9vR22edRdWtfW0D7lThG7OIR4Pw%3D" H 6800 4000 50  0001 C CNN "BOM"
 	1    6800 4000
 	-1   0    0    1   
 $EndComp
@@ -184,8 +189,9 @@ U 1 1 5E5B9717
 P 7050 3500
 F 0 "TP4" V 7004 3688 50  0000 L CNN
 F 1 "TestPoint" V 7095 3688 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 7250 3500 50  0001 C CNN
-F 3 "~" H 7250 3500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 7250 3500 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 7250 3500 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5191TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzuxnC5p8Orm3U%3D" V 7050 3500 50  0001 C CNN "BOM"
 	1    7050 3500
 	0    1    1    0   
 $EndComp
@@ -216,6 +222,7 @@ F 0 "J3" H 4118 3275 50  0000 C CNN
 F 1 "Screw_Terminal_01x02" H 4118 3366 50  0000 C CNN
 F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2_1x02_P5.00mm_Horizontal" H 4200 3600 50  0001 C CNN
 F 3 "~" H 4200 3600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Molex/39773-0002?qs=sGAEpiMZZMvZTcaMAxB2AHpdXjUJWjdtLXxXrTFbGKtdTXrI6XNfww%3D%3D" H 4200 3600 50  0001 C CNN "BOM"
 	1    4200 3600
 	-1   0    0    1   
 $EndComp

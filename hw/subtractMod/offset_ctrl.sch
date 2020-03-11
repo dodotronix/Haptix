@@ -21,6 +21,7 @@ F 0 "RV2" V 5000 3550 50  0000 R CNN
 F 1 "R_POT_TRIM" V 4900 3700 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 5100 3500 50  0001 C CNN
 F 3 "~" H 5100 3500 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" V 5100 3500 50  0001 C CNN "BOM"
 	1    5100 3500
 	0    1    1    0   
 $EndComp
@@ -62,6 +63,7 @@ F 0 "RV3" V 5950 4400 50  0000 R CNN
 F 1 "R_POT_TRIM" V 5850 4550 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 6050 4350 50  0001 C CNN
 F 3 "~" H 6050 4350 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" V 6050 4350 50  0001 C CNN "BOM"
 	1    6050 4350
 	0    1    -1   0   
 $EndComp
@@ -189,8 +191,9 @@ U 1 1 5E716044
 P 7000 3750
 F 0 "TP6" V 6954 3938 50  0000 L CNN
 F 1 "TestPoint" V 7045 3938 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 7200 3750 50  0001 C CNN
-F 3 "~" H 7200 3750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 7200 3750 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 7200 3750 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" V 7000 3750 50  0001 C CNN "BOM"
 	1    7000 3750
 	0    1    1    0   
 $EndComp
@@ -210,6 +213,7 @@ F 0 "RV6" H 7830 4046 50  0000 R CNN
 F 1 "R_POT_TRIM" H 7830 3955 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 7900 4000 50  0001 C CNN
 F 3 "~" H 7900 4000 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" H 7900 4000 50  0001 C CNN "BOM"
 	1    7900 4000
 	0    1    -1   0   
 $EndComp
@@ -260,8 +264,9 @@ AR Path="/5E5C53D8/5E72B23E" Ref="TP?"  Part="1"
 AR Path="/5E556D6F/5E72B23E" Ref="TP13"  Part="1" 
 F 0 "TP13" V 8554 4188 50  0000 L CNN
 F 1 "TestPoint" V 8645 4188 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 8800 4000 50  0001 C CNN
-F 3 "~" H 8800 4000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 8800 4000 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 8800 4000 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" V 8600 4000 50  0001 C CNN "BOM"
 	1    8600 4000
 	0    1    1    0   
 $EndComp
@@ -292,6 +297,7 @@ F 0 "RV1" H 5030 4204 50  0000 R CNN
 F 1 "R_POT_TRIM" H 5030 4295 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 5100 4250 50  0001 C CNN
 F 3 "~" H 5100 4250 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" H 5100 4250 50  0001 C CNN "BOM"
 	1    5100 4250
 	0    -1   -1   0   
 $EndComp

@@ -56,29 +56,8 @@ F 0 "U3" H 3250 1250 50  0000 L CNN
 F 1 "AD8276" H 3150 1350 50  0000 L CNN
 F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 3050 1450 50  0001 C CNN
 F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8276_8277.pdf" H 3050 1450 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Analog-Devices/AD8276ARZ?qs=sGAEpiMZZMv9Q1JI0Mo%2FtSQmcggxWXiF" H 3050 1450 50  0001 C CNN "BOM"
 	1    3050 1450
-	1    0    0    -1  
-$EndComp
-$Comp
-L dodo-logic:BUF04701 IC2
-U 1 1 5E55A3F1
-P 4950 2750
-F 0 "IC2" H 5000 3115 50  0000 C CNN
-F 1 "BUF04701" H 5000 3024 50  0000 C CNN
-F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 5050 2600 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/buf04701.pdf" H 5000 2750 50  0001 C CNN
-	1    4950 2750
-	1    0    0    -1  
-$EndComp
-$Comp
-L dodo-logic:BUF04701 IC2
-U 2 1 5E561A52
-P 5000 4850
-F 0 "IC2" H 5050 5215 50  0000 C CNN
-F 1 "BUF04701" H 5050 5124 50  0000 C CNN
-F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 5100 4700 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/buf04701.pdf" H 5050 4850 50  0001 C CNN
-	2    5000 4850
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
@@ -143,6 +122,7 @@ F 0 "U4" H 3300 5650 50  0000 L CNN
 F 1 "AD8276" H 3200 5750 50  0000 L CNN
 F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 3100 5850 50  0001 C CNN
 F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8276_8277.pdf" H 3100 5850 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Analog-Devices/AD8276ARZ?qs=sGAEpiMZZMv9Q1JI0Mo%2FtSQmcggxWXiF" H 3100 5850 50  0001 C CNN "BOM"
 	1    3100 5850
 	1    0    0    -1  
 $EndComp
@@ -214,39 +194,6 @@ Wire Wire Line
 Text Label 3950 4850 0    50   ~ 0
 sensB_out
 $Comp
-L dodo-logic:BUF04701 IC2
-U 3 1 5E61F6A5
-P 7100 4850
-F 0 "IC2" H 7150 5215 50  0000 C CNN
-F 1 "BUF04701" H 7150 5124 50  0000 C CNN
-F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 7200 4700 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/buf04701.pdf" H 7150 4850 50  0001 C CNN
-	3    7100 4850
-	1    0    0    -1  
-$EndComp
-$Comp
-L dodo-logic:BUF04701 IC2
-U 4 1 5E6201B1
-P 7000 2750
-F 0 "IC2" H 7050 3115 50  0000 C CNN
-F 1 "BUF04701" H 7050 3024 50  0000 C CNN
-F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 7100 2600 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/buf04701.pdf" H 7050 2750 50  0001 C CNN
-	4    7000 2750
-	1    0    0    -1  
-$EndComp
-$Comp
-L dodo-logic:BUF04701 IC2
-U 5 1 5E6218EA
-P 8500 1450
-F 0 "IC2" V 8454 1538 50  0000 L CNN
-F 1 "BUF04701" V 8545 1538 50  0000 L CNN
-F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 8600 1300 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/buf04701.pdf" H 8550 1450 50  0001 C CNN
-	5    8500 1450
-	0    1    1    0   
-$EndComp
-$Comp
 L power:-5V #PWR026
 U 1 1 5E625B4E
 P 8500 1850
@@ -297,6 +244,7 @@ F 0 "RV5" H 5880 4896 50  0000 R CNN
 F 1 "R_POT_TRIM" H 5880 4805 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 5950 4850 50  0001 C CNN
 F 3 "~" H 5950 4850 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" H 5950 4850 50  0001 C CNN "BOM"
 	1    5950 4850
 	0    -1   -1   0   
 $EndComp
@@ -317,7 +265,8 @@ AR Path="/5E58DC75/5E5BF320" Ref="RV4"  Part="1"
 F 0 "RV4" H 5830 2796 50  0000 R CNN
 F 1 "R_POT_TRIM" H 5830 2705 50  0000 R CNN
 F 2 "Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical" H 5900 2750 50  0001 C CNN
-F 3 "~" H 5900 2750 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/54/3314-776736.pdf" H 5900 2750 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Bourns/3314J-2-105E?qs=sGAEpiMZZMvygUB3GLcD7g2uut0mCOdNBBUJ5VY5B4c%3D" H 5900 2750 50  0001 C CNN "BOM"
 	1    5900 2750
 	0    1    -1   0   
 $EndComp
@@ -331,8 +280,9 @@ U 1 1 5E60832E
 P 3450 1250
 F 0 "TP7" V 3404 1438 50  0000 L CNN
 F 1 "TestPoint" V 3495 1438 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 3650 1250 50  0001 C CNN
-F 3 "~" H 3650 1250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 3650 1250 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 3650 1250 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" V 3450 1250 50  0001 C CNN "BOM"
 	1    3450 1250
 	0    1    1    0   
 $EndComp
@@ -345,8 +295,9 @@ U 1 1 5E60982E
 P 3500 5600
 F 0 "TP8" V 3454 5788 50  0000 L CNN
 F 1 "TestPoint" V 3545 5788 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 3700 5600 50  0001 C CNN
-F 3 "~" H 3700 5600 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 3700 5600 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 3700 5600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" V 3500 5600 50  0001 C CNN "BOM"
 	1    3500 5600
 	0    1    1    0   
 $EndComp
@@ -359,8 +310,9 @@ U 1 1 5E61D78A
 P 6500 4600
 F 0 "TP12" H 6558 4718 50  0000 L CNN
 F 1 "TestPoint" H 6558 4627 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 6700 4600 50  0001 C CNN
-F 3 "~" H 6700 4600 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 6700 4600 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 6700 4600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" H 6500 4600 50  0001 C CNN "BOM"
 	1    6500 4600
 	1    0    0    -1  
 $EndComp
@@ -370,8 +322,9 @@ U 1 1 5E61E3D0
 P 5450 4600
 F 0 "TP10" H 5508 4718 50  0000 L CNN
 F 1 "TestPoint" H 5508 4627 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 5650 4600 50  0001 C CNN
-F 3 "~" H 5650 4600 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 5650 4600 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 5650 4600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" H 5450 4600 50  0001 C CNN "BOM"
 	1    5450 4600
 	1    0    0    -1  
 $EndComp
@@ -395,8 +348,9 @@ U 1 1 5E64BAE5
 P 6400 2500
 F 0 "TP11" H 6458 2618 50  0000 L CNN
 F 1 "TestPoint" H 6458 2527 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 6600 2500 50  0001 C CNN
-F 3 "~" H 6600 2500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 6600 2500 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 6600 2500 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" H 6400 2500 50  0001 C CNN "BOM"
 	1    6400 2500
 	1    0    0    -1  
 $EndComp
@@ -406,8 +360,9 @@ U 1 1 5E64D5DF
 P 5350 2500
 F 0 "TP9" H 5408 2618 50  0000 L CNN
 F 1 "TestPoint" H 5408 2527 50  0000 L CNN
-F 2 "TestPoint:TestPoint_Pad_2.0x2.0mm" H 5550 2500 50  0001 C CNN
-F 3 "~" H 5550 2500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_3.0x3.0mm" H 5550 2500 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/215/Keystone_Electronics_04082019_5190TR-5199TR-1551357.pdf" H 5550 2500 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Keystone-Electronics/5194TR?qs=sGAEpiMZZMtzcnMBgC2bs84ygu06jYzulkX4bJ%2F%252Bd0s%3D" H 5350 2500 50  0001 C CNN "BOM"
 	1    5350 2500
 	1    0    0    -1  
 $EndComp
@@ -478,6 +433,7 @@ F 0 "J2" H 2118 1175 50  0000 C CNN
 F 1 "Screw_Terminal_01x04" H 2118 1266 50  0000 C CNN
 F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal" H 2200 1600 50  0001 C CNN
 F 3 "~" H 2200 1600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Phoenix-Contact/1725672?qs=sGAEpiMZZMvZTcaMAxB2AF3qQv3QF5c1cqzdDV%2FmZgo%3D" H 2200 1600 50  0001 C CNN "BOM"
 	1    2200 1600
 	-1   0    0    1   
 $EndComp
@@ -489,6 +445,7 @@ F 0 "J1" H 2118 5575 50  0000 C CNN
 F 1 "Screw_Terminal_01x04" H 2118 5666 50  0000 C CNN
 F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-4-5.08_1x04_P5.08mm_Horizontal" H 2200 6000 50  0001 C CNN
 F 3 "~" H 2200 6000 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Phoenix-Contact/1725672?qs=sGAEpiMZZMvZTcaMAxB2AF3qQv3QF5c1cqzdDV%2FmZgo%3D" H 2200 6000 50  0001 C CNN "BOM"
 	1    2200 6000
 	-1   0    0    1   
 $EndComp
@@ -499,7 +456,8 @@ P 8050 1600
 F 0 "D1" V 8089 1483 50  0000 R CNN
 F 1 "LED" V 7998 1483 50  0000 R CNN
 F 2 "LED_SMD:LED_0603_1608Metric" H 8050 1600 50  0001 C CNN
-F 3 "~" H 8050 1600 50  0001 C CNN
+F 3 "https://eu.mouser.com/datasheet/2/109/Dialight_CBI_data_599-0603_Apr2018-1370611.pdf" H 8050 1600 50  0001 C CNN
+F 4 "https://eu.mouser.com/ProductDetail/Dialight/599-0010-007F?qs=sGAEpiMZZMseGfSY3csMkdgyOOAg6kv2lGy%2FbkJhIAObtuLERQeGuQ%3D%3D" V 8050 1600 50  0001 C CNN "BOM"
 	1    8050 1600
 	0    -1   -1   0   
 $EndComp
@@ -662,4 +620,59 @@ Wire Wire Line
 	2600 5750 2600 5900
 Wire Wire Line
 	2600 5900 2400 5900
+$Comp
+L dodo-analog:AD8244 IC2
+U 1 1 5E7AC8AD
+P 4950 2750
+F 0 "IC2" H 5000 3115 50  0000 C CNN
+F 1 "AD8244" H 5000 3024 50  0000 C CNN
+F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 4950 2750 50  0001 C CNN
+F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8244.pdf" H 4950 2750 50  0001 C CNN
+	1    4950 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L dodo-analog:AD8244 IC2
+U 2 1 5E7B346D
+P 5000 4850
+F 0 "IC2" H 5050 5215 50  0000 C CNN
+F 1 "AD8244" H 5050 5124 50  0000 C CNN
+F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 5000 4850 50  0001 C CNN
+F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8244.pdf" H 5000 4850 50  0001 C CNN
+	2    5000 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L dodo-analog:AD8244 IC2
+U 3 1 5E7B8431
+P 7100 4850
+F 0 "IC2" H 7150 5215 50  0000 C CNN
+F 1 "AD8244" H 7150 5124 50  0000 C CNN
+F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 7100 4850 50  0001 C CNN
+F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8244.pdf" H 7100 4850 50  0001 C CNN
+	3    7100 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L dodo-analog:AD8244 IC2
+U 4 1 5E7BD73A
+P 7000 2750
+F 0 "IC2" H 7050 3115 50  0000 C CNN
+F 1 "AD8244" H 7050 3024 50  0000 C CNN
+F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 7000 2750 50  0001 C CNN
+F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8244.pdf" H 7000 2750 50  0001 C CNN
+	4    7000 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L dodo-analog:AD8244 IC2
+U 5 1 5E7BDEF2
+P 8500 1450
+F 0 "IC2" V 8454 1538 50  0000 L CNN
+F 1 "AD8244" V 8545 1538 50  0000 L CNN
+F 2 "Package_SO:MSOP-10_3x3mm_P0.5mm" H 8500 1450 50  0001 C CNN
+F 3 "https://www.analog.com/media/en/technical-documentation/data-sheets/AD8244.pdf" H 8500 1450 50  0001 C CNN
+	5    8500 1450
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
