@@ -5,7 +5,9 @@ clear all
 % constants
 m = 50; % kg
 g = 10;
-fs = 10000; % Hz
+fs = 1e4; % Hz
+material_coeff = 8e3; % N/s^2 recommended range <2; inf)
+peak_max = 4e2; % N
 
 % USER SETTINGS
 h = 200; % m
@@ -98,6 +100,21 @@ t_vec = [0:length(v_vec)-1]*Ts;
 % calculate distance
 s_vec = cumtrapz(v_vec)/fs;
 
+% create force vector which is pressing back on the tool
+touch_point = find(s_vec >= h_new-h_tool_new);
+f_max = peak_max - mod(peak_max, Ts)
+x_max = sqrt(f_max/(material_coeff^2))
+x = [0:Ts:x_max];
+f = (material_coeff*x).^2 + m*-a2_new;
+
+if length(f) > length(touch_point)
+    error("ERROR: the material_coeff is too low")
+end
+
+% we have to make the length -1 because of the acceleration vector size
+contra_force = [zeros(1, length(s_vec) - length(touch_point)) ...
+    f zeros(1,length(touch_point) - length(f) -1)];
+
 %-----------------------------------------------------------------------------%
 
 figure()
@@ -127,13 +144,14 @@ xlabel("time [s]")
 grid on
 
 subplot(2, 1, 2)
-plot(t_vec(1:end-1), f_vec, "b-", 'linewidth', 2)
+plot(t_vec(1:end-1), f_vec+contra_force, "b-", 'linewidth', 2)
+hold on
+plot(t_vec(1:end-1), contra_force+m*g, "g--", 'linewidth', 2)
 ylabel("force [N]")
 xlabel("time [s]")
 grid on
 
 %-----------------------------------------------------------------------------%
-
 
 
 
