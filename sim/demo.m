@@ -100,23 +100,27 @@ s_vec = cumtrapz(v_vec)/fs;
 %-----------------------------------------------------------------------------%
 
 figure()
-plot(t_vec, v_vec, linestyle="-", linewidth=10)
+subplot(2, 1, 1)
+plot(t_vec, v_vec, "r-", 'linewidth', 2)
 ylabel("velocity [m/s]")
 xlabel("time [s]")
 grid on
+
+subplot(2, 1, 2)
+plot(t_vec, s_vec, "g-", 'linewidth', 2)
+ylabel("distance [m]")
+xlabel("time [s]")
+grid on
+
+%-----------------------------------------------------------------------------%
 
 % calculate acceleration vector we get from accelerometer sensor (no noise)
 a_vec = diff(v_vec)./diff([t_vec]);
 
 figure()
-plot(t_vec(1:end-1), a_vec, linestyle="-", linewidth=4)
+plot(t_vec(1:end-1), a_vec, "b-", 'linewidth', 2)
 ylabel("acceleration [m/s^2]")
 xlabel("time [s]")
 grid on
 
 
-figure()
-plot(t_vec, s_vec, linestyle="-", linewidth=4)
-ylabel("distance [m]")
-xlabel("time [s]")
-grid on
