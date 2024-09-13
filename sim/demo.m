@@ -3,8 +3,9 @@ close all
 clear all
 
 % constants
+m = 50; % kg
 g = 10;
-fs = 100; % Hz
+fs = 10000; % Hz
 
 % USER SETTINGS
 h = 200; % m
@@ -112,15 +113,27 @@ ylabel("distance [m]")
 xlabel("time [s]")
 grid on
 
-%-----------------------------------------------------------------------------%
-
 % calculate acceleration vector we get from accelerometer sensor (no noise)
 a_vec = diff(v_vec)./diff([t_vec]) + g;
 
+% calculate force vector we get from force sensor
+f_vec = m*a_vec;
+
 figure()
+subplot(2, 1, 1)
 plot(t_vec(1:end-1), a_vec, "b-", 'linewidth', 2)
 ylabel("acceleration [m/s^2]")
 xlabel("time [s]")
 grid on
+
+subplot(2, 1, 2)
+plot(t_vec(1:end-1), f_vec, "b-", 'linewidth', 2)
+ylabel("force [N]")
+xlabel("time [s]")
+grid on
+
+%-----------------------------------------------------------------------------%
+
+
 
 
