@@ -115,7 +115,7 @@ grid on
 %-----------------------------------------------------------------------------%
 
 % calculate acceleration vector we get from accelerometer sensor (no noise)
-a_vec = diff(v_vec)./diff([t_vec]);
+a_vec = diff(v_vec)./diff([t_vec]) + g;
 
 figure()
 plot(t_vec(1:end-1), a_vec, "b-", 'linewidth', 2)
