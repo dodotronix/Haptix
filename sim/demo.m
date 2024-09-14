@@ -5,8 +5,8 @@ clear all
 % constants
 m = 50; % kg
 g = 10; % m/s^2
-fs = 100; % Hz
-material_coeff = 1e1; % N/s^2 recommended range <2; inf)
+fs = 10000; % Hz
+material_coeff = 1e2; % N/s^2 recommended range <2; inf)
 
 % USER SETTINGS
 h = 400; % mm
@@ -15,7 +15,7 @@ soft_switch = 200; % mm
 
 a0 = 10; % mm/s^2
 a1 = -5; % mm/s^2
-a2 = -100; % mm/s^2
+a2 = -400; % mm/s^2
 
 v0 = 0;
 v1 = 12 % mm/s;
@@ -96,7 +96,7 @@ t_vec = [0:length(v_vec)-1]*Ts;
 s_vec = cumtrapz(v_vec)*Ts;
 
 % create force vector which is pressing back on the tool
-touch_point_inx = find(s_vec >= (s0 + v1*t1 + s2 + v2*t3))
+touch_point_inx = find(s_vec >= (s0 + v1*t1 + s2 + v2*t3));
 s_vec(touch_point_inx)(1)
 
 % here just for debugging purposes
@@ -111,11 +111,6 @@ end
 
 contra_force = [zeros(1, touch_point_inx(1) - 1) f ...
     zeros(1, length(s_vec) - touch_point_inx(1) - length(f) + 1)];
-
-length(v_vec)
-length(s_vec)
-length(t_vec)
-length(contra_force)
 
 %-----------------------------------------------------------------------------%
 
@@ -160,6 +155,27 @@ grid on
 
 
 %-----------------------------------------------------------------------------%
-
 % simulation for different force sensor positionings
+sys_fs = 1e3;
+Tsys = 1/sys_fs;
+fs_ratio = fs/sys_fs;
+t_sim = [0:Tsys:t_vec(end-1)];
+
+% generate defined noise and interference signal
+f = 0.2; % Hz
+interference_s = 10*sin(2*pi*f*t_sim) + 0.2*randn(1, length(t_sim));
+
+test_s = f_vec + contra_force(1:end-1);
+test_s_noise = test_s + 0.1*randn(1, length(test_s));
+test_s_noise_sampled = test_s_noise(1:fs_ratio:end);
+
+
+
+
+figure()
+plot(t_sim, test_s_noise_sampled, "r-", 'linewidth', 2)
+hold on
+plot(t_sim, interference_s + m*g, "b-", 'linewidth', 2)
+grid on
+
 
