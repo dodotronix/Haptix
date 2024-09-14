@@ -157,3 +157,9 @@ plot(t_vec(1:end-1), f_vec + contra_force(1:end-1), "r-o", 'linewidth', 2)
 ylabel("force [N]")
 xlabel("time [s]")
 grid on
+
+
+%-----------------------------------------------------------------------------%
+
+% simulation for different force sensor positionings
+
