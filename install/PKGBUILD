@@ -1,0 +1,26 @@
+# Maintainer: dodotronix <dodotronix@gmail.com>
+
+pkgname=python-adafruit-bno08x
+_pypi_pkgname=adafruit-circuitpython-bno08x-py
+pkgver=1.2.6
+pkgrel=0
+pkgdesc="CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython"
+arch=('armv6h' 'armv7h' 'aarch64' 'x86_64')
+url="https://github.com/adafruit/Adafruit_CircuitPython_BNO08x"
+license=('MIT')
+makedepends=( 'python-build' 'python-installer' 'python-wheel' 'python-setuptools-scm')
+depends=('python')
+optdepends=()
+source=("https://github.com/adafruit/Adafruit_CircuitPython_BNO08x/releases/download/${pkgver}/${_pypi_pkgname}-${pkgver}.zip")
+sha256sums=('SKIP')
+
+build() {
+    cd "${srcdir}/${_pypi_pkgname}-${pkgver}/requirements/adafruit_bno08x"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/${_pypi_pkgname}-$pkgver"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+    install -vDm644 -t "$pkgdir/usr/share/license/$pkgname" LICENSE
+}
