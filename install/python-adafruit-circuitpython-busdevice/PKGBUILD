@@ -1,0 +1,32 @@
+# Maintainer: dodotronix <dodotronix@gmail.com>
+#
+_gitrepo='Adafruit_CircuitPython_BusDevice'
+pkgname='python-adafruit-circuitpython-busdevice-git'
+pkgver=5.2.9.r0.g88250a1
+pkgrel=1
+pkgdesc="CircuitPython bus device classes to manage bus sharing"
+arch=('any')
+url="https://github.com/adafruit/Adafruit_CircuitPython_BusDevice"
+license=('GPL3')
+makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
+depends=('python')
+conflicts=('python-adafruit-circuitpython-busdevice')
+provides=("python-adafruit-circuitpython-busdevice-git=$pkgver")
+source=("git+https://github.com/adafruit/${_gitrepo}.git")
+sha384sums=('SKIP')
+
+pkgver() {
+    cd "${srcdir}/${_gitrepo}"
+    git describe --tags --long | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    cd "${srcdir}/${_gitrepo}"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/${_gitrepo}"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+    install -vDm644 -t "$pkgdir/usr/share/license/$pkgname" LICENSE
+}
