@@ -1,26 +1,27 @@
 # Maintainer: dodotronix <dodotronix@gmail.com>
-
-pkgname=python-adafruit-bno08x
-_pypi_pkgname=adafruit-circuitpython-bno08x-py
+#
+_gitrepo='Adafruit_CircuitPython_BNO08x'
+pkgname='python-adafruit-bno08x-git'
 pkgver=1.2.6
-pkgrel=0
-pkgdesc="CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython"
-arch=('armv6h' 'armv7h' 'aarch64' 'x86_64')
+pkgrel=1
+pkgdesc="CircuitPython library to control accelerometer and gyroscope BNO08x"
+arch=('any')
 url="https://github.com/adafruit/Adafruit_CircuitPython_BNO08x"
-license=('MIT')
-makedepends=( 'python-build' 'python-installer' 'python-wheel' 'python-setuptools-scm')
+license=('GPL3')
+makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
 depends=('python')
-optdepends=()
-source=("https://github.com/adafruit/Adafruit_CircuitPython_BNO08x/releases/download/${pkgver}/${_pypi_pkgname}-${pkgver}.zip")
-sha256sums=('SKIP')
+conflicts=('python-adafruit-bno08x-git')
+provides=("python-adafruit-bno08x-git=$pkgver")
+source=("git+https://github.com/adafruit/Adafruit_CircuitPython_BNO08x.git")
+sha384sums=('SKIP')
 
 build() {
-    cd "${srcdir}/${_pypi_pkgname}-${pkgver}/requirements/adafruit_bno08x"
+    cd "${srcdir}/${_gitrepo}"
     python -m build --wheel --no-isolation
 }
 
 package() {
-    cd "$srcdir/${_pypi_pkgname}-$pkgver"
+    cd "$srcdir/${_gitrepo}"
     python -m installer --destdir="$pkgdir" dist/*.whl
     install -vDm644 -t "$pkgdir/usr/share/license/$pkgname" LICENSE
 }
