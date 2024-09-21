@@ -1,0 +1,32 @@
+# Maintainer: dodotronix <dodotronix@gmail.com>
+#
+_gitrepo='Adafruit_CircuitPython_MPU6050'
+pkgname='python-adafruit-mpu6050-git'
+pkgver=1.2.4
+pkgrel=1
+pkgdesc="CircuitPython library to control accelerometer MPU6050"
+arch=('any')
+url="https://github.com/adafruit/Adafruit_CircuitPython_MPU6050"
+license=('GPL3')
+makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
+
+depends=(
+    'python' 
+    'python-adafruit-circuitpython-register-git' 
+    'python-adafruit-circuitpython-busdevice-git')
+
+conflicts=('python-adafruit-mpu6050-git')
+provides=("python-adafruit-mpu6050-git=$pkgver")
+source=("git+https://github.com/adafruit/Adafruit_CircuitPython_MPU6050.git")
+sha384sums=('SKIP')
+
+build() {
+    cd "${srcdir}/${_gitrepo}"
+    python -m build --wheel --no-isolation
+}
+
+package() {
+    cd "$srcdir/${_gitrepo}"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+    install -vDm644 -t "$pkgdir/usr/share/license/$pkgname" LICENSE
+}
