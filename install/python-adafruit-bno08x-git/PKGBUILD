@@ -9,7 +9,7 @@ arch=('any')
 url="https://github.com/adafruit/Adafruit_CircuitPython_BNO08x"
 license=('GPL3')
 makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
-depends=('python' 'python-adafruit-circuitpython-busdevice')
+depends=('python' 'python-adafruit-circuitpython-busdevice-git')
 conflicts=('python-adafruit-bno08x-git')
 provides=("python-adafruit-bno08x-git=$pkgver")
 source=("git+https://github.com/adafruit/Adafruit_CircuitPython_BNO08x.git")
