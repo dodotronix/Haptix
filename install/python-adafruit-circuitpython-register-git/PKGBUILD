@@ -1,7 +1,7 @@
 # Maintainer: dodotronix <dodotronix@gmail.com>
 #
 _gitrepo='Adafruit_CircuitPython_Register'
-pkgname='python-adafruit-register-git'
+pkgname='python-adafruit-circuitpython-register-git'
 pkgver=1.2.4
 pkgrel=1
 pkgdesc="CircuitPython library simplifying register access for i2c"
@@ -10,8 +10,8 @@ url="https://github.com/adafruit/Adafruit_CircuitPython_Register"
 license=('GPL3')
 makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
 depends=('python')
-conflicts=('python-adafruit-register')
-provides=("python-adafruit-register-git=$pkgver")
+conflicts=('python-adafruit-circuitpython-register')
+provides=("python-adafruit-circuitpython-register-git=$pkgver")
 source=("git+https://github.com/adafruit/Adafruit_CircuitPython_Register.git")
 sha384sums=('SKIP')
 

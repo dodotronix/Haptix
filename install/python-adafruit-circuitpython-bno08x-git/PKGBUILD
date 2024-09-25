@@ -1,7 +1,7 @@
 # Maintainer: dodotronix <dodotronix@gmail.com>
 #
 _gitrepo='Adafruit_CircuitPython_BNO08x'
-pkgname='python-adafruit-bno08x-git'
+pkgname='python-adafruit-circuitpython-bno08x-git'
 pkgver=1.2.6
 pkgrel=1
 pkgdesc="CircuitPython library to control accelerometer and gyroscope BNO08x"
