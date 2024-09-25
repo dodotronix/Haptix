@@ -10,7 +10,7 @@ url="https://github.com/adafruit/Adafruit_CircuitPython_Register"
 license=('GPL3')
 makedepends=('git' 'python' 'python-build' 'python-installer' 'python-wheel')
 depends=('python')
-conflicts=('python-adafruit-register-git')
+conflicts=('python-adafruit-register')
 provides=("python-adafruit-register-git=$pkgver")
 source=("git+https://github.com/adafruit/Adafruit_CircuitPython_Register.git")
 sha384sums=('SKIP')

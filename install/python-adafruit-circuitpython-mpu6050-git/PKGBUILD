@@ -15,7 +15,7 @@ depends=(
     'python-adafruit-circuitpython-register-git' 
     'python-adafruit-circuitpython-busdevice-git')
 
-conflicts=('python-adafruit-mpu6050-git')
+conflicts=('python-adafruit-mpu6050')
 provides=("python-adafruit-mpu6050-git=$pkgver")
 source=("git+https://github.com/adafruit/Adafruit_CircuitPython_MPU6050.git")
 sha384sums=('SKIP')
