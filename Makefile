@@ -33,6 +33,8 @@ install_dependencies:
 		python-pyftdi \
 		--noconfirm
 	@yay -S --noconfirm \
+		python-pyvisa \
+		python-pyvisa-py \
 		python-sysv_ipc \
 		python-gpiod \
 		python-adafruit-pureio
