@@ -1,0 +1,187 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "900e6e10-af1f-4ec5-a075-6ae6c64aeb78")
+	(paper "A4")
+	(lib_symbols)
+	(wire
+		(pts
+			(xy 144.78 83.82) (xy 160.02 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "37957fca-88e4-46f7-879f-98c420b755c7")
+	)
+	(wire
+		(pts
+			(xy 144.78 72.39) (xy 160.02 72.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cf6302fe-5ce6-4caf-b7c0-8e9cd836408d")
+	)
+	(sheet
+		(at 123.19 121.92)
+		(size 52.07 24.13)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "00000000-0000-0000-0000-00005e46b34f")
+		(property "Sheetname" "power_block"
+			(at 123.19 121.2084 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power_block.kicad_sch"
+			(at 123.19 146.6346 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "subtractMod"
+				(path "/900e6e10-af1f-4ec5-a075-6ae6c64aeb78"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 160.02 48.26)
+		(size 36.83 58.42)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "00000000-0000-0000-0000-00005e556d6f")
+		(property "Sheetname" "offset_control"
+			(at 160.02 47.5484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "offset_ctrl.kicad_sch"
+			(at 160.02 107.2646 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "chan1_in" input
+			(at 160.02 72.39 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "b01b2548-a53d-4c9b-90e1-0d2b7d12910f")
+		)
+		(pin "chan2_in" input
+			(at 160.02 83.82 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "4b204dae-0a6a-42e1-b774-1112de65858b")
+		)
+		(instances
+			(project "subtractMod"
+				(path "/900e6e10-af1f-4ec5-a075-6ae6c64aeb78"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 106.68 48.26)
+		(size 38.1 58.42)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "00000000-0000-0000-0000-00005e58dc75")
+		(property "Sheetname" "Input_channel"
+			(at 106.68 47.5484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "In_channel.kicad_sch"
+			(at 106.68 107.2646 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "chan1_out" output
+			(at 144.78 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "dca25905-75b5-4436-bf42-7b7dfa20f279")
+		)
+		(pin "chan2_out" output
+			(at 144.78 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "a0d88322-e0f6-420d-858f-3e46cdf7ffd4")
+		)
+		(instances
+			(project "subtractMod"
+				(path "/900e6e10-af1f-4ec5-a075-6ae6c64aeb78"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)
