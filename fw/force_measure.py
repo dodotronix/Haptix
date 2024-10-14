@@ -1,11 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
-os.environ['BLINKA_FT232H'] = "1"
-
-import board
-import digitalio
 import pyvisa
 
 import logging as log
@@ -14,7 +9,6 @@ import matplotlib.pyplot as plot
 
 from time import sleep
 from datetime import datetime
-from math import ceil, floor
 
 log.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', 
         datefmt='%m/%d/%Y %I:%M:%S %p',level=log.INFO)
@@ -127,10 +121,6 @@ if __name__ == '__main__':
     inst = rm.open_resource(rm.list_resources()[0])
     print(f"Connected to: {inst.query("*IDN?")}")
 
-    # start measurement
-    digital = digitalio.DigitalInOut(board.C0)
-    digital.direction = digitalio.Direction.OUTPUT
-    digital.value = False
 
     # 12 V amplitude 
     # 0.2 s/timescale
@@ -140,11 +130,6 @@ if __name__ == '__main__':
     __start_acquisition()
 
     print(f"{inst.query('TRIG:STAT?')}")
-
-    # start measurement
-    digital.value = True
-    sleep(0.5)
-    digital.value = False
 
     force = __acquisition_complet(inst)
     print(f"data length: {len(force)}")
