@@ -7,6 +7,7 @@ import logging as log
 import numpy as np
 import matplotlib.pyplot as plot
 
+from math import ceil
 from time import sleep
 from datetime import datetime
 
@@ -14,17 +15,17 @@ log.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
         datefmt='%m/%d/%Y %I:%M:%S %p',level=log.INFO)
 
 def __wait_until_complete():
-    inst.write("*WAI")
+    return inst.query("*OPC?")
 
 def __start_acquisition():
     inst.write(f"RUN")
     __wait_until_complete()
-    sleep(1)
 
 def __acquisition_complet(inst):
-    print("waiting for the acquisition")
+    inst.write(f"TRIG:SWE SING")
+    log.info("waiting for the acquisition")
     while inst.query("TRIG:STAT?") != "STOP":
-        pass
+        sleep(0.1)
 
     return get_wave_data(inst)
 
@@ -34,14 +35,14 @@ def get_wave_data(inst):
     time_offset = inst.query("TIM:MAIN:OFFS?")
     xorigin = inst.query("WAVeform:XOR?")
 
-    points_per_packet = 15e4
+    points_per_packet = 24e4
     packets = ceil(number_of_data / points_per_packet)
-    print(f"packets: {packets}")
+    log.info(f"packets: {packets}")
 
-    print(f"Time offset: {time_offset}")
-    print(f"X origin: {xorigin}")
-    print(f"Memory size: {number_of_data}")
-    print(f"Sampling rate: {sampling_rate}")
+    log.info(f"Time offset: {time_offset}")
+    log.info(f"X origin: {xorigin}")
+    log.info(f"Memory size: {number_of_data}")
+    log.info(f"Sampling rate: {sampling_rate}")
 
     inst.write("WAV:MODE RAW")
     inst.write("WAV:FORM BYTE")
@@ -55,14 +56,12 @@ def get_wave_data(inst):
         end = int(start + points_per_packet-1)
         if end > number_of_data:
             end = number_of_data
-        print(f"start: {start}, end: {end}")
+        log.info(f"start: {start}, end: {end}")
         inst.write(f"WAV:STAR {start}")
         inst.write(f"WAV:STOP {end}")
         inst.write(f"WAV:DATA?")
         start = end + 1
         d = inst.read_raw()
-        while inst.query("*OPC?") != "1":
-            pass
         header_length = int(d[1:2])
         num_bytes = int(d[2:2+header_length])
         waveform_data = d[2+header_length:2+header_length+num_bytes]
@@ -74,13 +73,16 @@ def get_wave_data(inst):
 
 def setup(inst, amp, timescale, memsize, trig):
 
-    inst.write("*RST")
-    __wait_until_complete()
     inst.write_termination = '\n'
     inst.read_termination = '\n'
+    inst.timeout = None
+
+    inst.write("*RST")
+    __wait_until_complete()
 
     inst.write("CHAN1:DISP ON")
     __wait_until_complete()
+
     inst.write("CHAN4:DISP ON")
     __wait_until_complete()
 
@@ -89,9 +91,9 @@ def setup(inst, amp, timescale, memsize, trig):
     inst.write("CHAN4:PROB 1")
     __wait_until_complete()
 
-    inst.write(f"CHAN1:SCAL {amp/8}") # vertical - 10 grid parts
+    inst.write(f"CHAN1:SCAL {amp/8}") # vertical - 8 grid parts
     __wait_until_complete()
-    inst.write(f"CHAN4:SCAL {amp/8}") # vertical - 10 grid parts
+    inst.write(f"CHAN4:SCAL {amp/8}") # vertical - 8 grid parts
     __wait_until_complete()
 
     inst.write(f"TIM:MAIN:SCAL {timescale}") # time in ms
@@ -102,13 +104,14 @@ def setup(inst, amp, timescale, memsize, trig):
     inst.write(f"ACQ:MDEP {memsize}")
     __wait_until_complete()
 
-    # # set trigger
+    # set trigger
     inst.write(f"TRIG:EDG:SOUR CHAN4") # trigger source
     inst.write(f"TRIG:EDG:LEV {trig}") # trigger level
     inst.write(f"TRIG:EDG:SLOP POS") # rising edge
-    inst.write(f"TRIG:SWE SING")
     __wait_until_complete()
 
+    inst.write(f"CHAN1:OFFS {-3*amp/8}")
+    __wait_until_complete()
 
 def close(inst):
     inst.close()
@@ -117,33 +120,39 @@ if __name__ == '__main__':
     # memory size is defined by the rigol datasheet
     memdepths = [6000, 60000, 600000, 6000000, 12000000]
 
+    rigol_addr = "10.0.0.14"
+    pyvisa_addr = f"TCPIP0::{rigol_addr}::INSTR"
     rm = pyvisa.ResourceManager()
-    inst = rm.open_resource(rm.list_resources()[0])
-    print(f"Connected to: {inst.query("*IDN?")}")
+    inst = rm.open_resource(pyvisa_addr)
 
+    log.info(f"Connected to: {inst.query("*IDN?")}")
 
     # 12 V amplitude 
     # 0.2 s/timescale
     # memory size
     # 1.5 V trigger 
-    setup(inst, 16, 0.2, memdepths[2], 1.5)
-    __start_acquisition()
+    setup(inst, 16, 0.5, memdepths[2], 1.5)
+    log.info("Start program")
 
-    print(f"{inst.query('TRIG:STAT?')}")
+    try:
+        while True:
+            __start_acquisition()
+            log.info(f"{inst.query('TRIG:STAT?')}")
 
-    force = __acquisition_complet(inst)
-    print(f"data length: {len(force)}")
-    print("Done")
+            force = __acquisition_complet(inst)
+            a = f"force_{datetime.now().strftime('%H%M%S')}"
+            log.info(f"Saving data to: {a} of length {len(force)}")
+            np.savetxt(f'{a}.txt', force, fmt='%.5f')
+            log.info("Done")
 
-    close(inst)
-    print("Closed")
+            # preview
+            plot.plot(force)
+            plot.title("Channel samples [-]")
+            plot.ylabel("Amplitude [-]")
+            plot.grid()
+            plot.show()
 
-    # save to files
-    a = f"force_{datetime.now().strftime('%H%M%S')}"
-    np.savetxt(f'{a}.txt', force, fmt='%.5f')
+    except KeyboardInterrupt:
+        close(inst)
+        log.info("Closed")
 
-    plot.plot(force)
-    plot.title("Channel samples [-]")
-    plot.ylabel("Amplitude [-]")
-    plot.grid()
-    plot.show()

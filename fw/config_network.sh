@@ -16,4 +16,4 @@ ip addr add 10.0.0.2/24 dev enp0s31f6
 # }
 
 # start dhcpd
-systemctl start dhcpcd4@enp0s31f6
+systemctl start dhcpd4@enp0s31f6
