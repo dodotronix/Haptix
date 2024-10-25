@@ -5,8 +5,7 @@ import digitalio
 import adafruit_mpu6050
 import gc
 
-from time import sleep, monotonic
-from adafruit_datetime import datetime, timedelta
+from time import sleep
 from adafruit_register.i2c_bit import RWBit
 from adafruit_bus_device.i2c_device import I2CDevice
 from adafruit_debouncer import Debouncer
@@ -19,21 +18,21 @@ class DeviceControl:
     master_int = RWBit(0x38, 3)
     fifo_over = RWBit(0x38, 4)
 
-initial_time = datetime(2024, 10, 16, 9, 58, 0)  # (YYYY, MM, DD, HH, MM, SS)
-start_monotonic = monotonic()
-
 i2c = busio.I2C(board.SCL, board.SDA, frequency=400000)
 interrupt = DeviceControl(i2c)
 mpu = adafruit_mpu6050.MPU6050(i2c)
 
 # mpu.sample_rate_divisor = 15
 mpu.sample_rate_divisor = 31
-mpu.filter_bandwidth = adafruit_mpu6050.Bandwidth.BAND_260_HZ
+# mpu.filter_bandwidth = adafruit_mpu6050.Bandwidth.BAND_260_HZ
 # mpu.filter_bandwidth = adafruit_mpu6050.Bandwidth.BAND_184_HZ
 
 interrupt.int_ready = True
 interrupt.master_int = False
 interrupt.fifo_over = False
+
+t = digitalio.DigitalInOut(board.D0)
+t.direction = digitalio.Direction.INPUT
 
 syncpin = digitalio.DigitalInOut(board.D3)
 syncpin.direction = digitalio.Direction.OUTPUT
@@ -43,18 +42,11 @@ pin = digitalio.DigitalInOut(board.D1)
 pin.direction = digitalio.Direction.INPUT
 switch = Debouncer(pin)
 
-t = digitalio.DigitalInOut(board.D0)
-t.direction = digitalio.Direction.INPUT
-
 pixel = neopixel.NeoPixel(board.NEOPIXEL, 1)
 
+fileid = 0
 
 while True:
-    elapsed_seconds = monotonic() - start_monotonic
-    elapsed_timedelta = timedelta(seconds=elapsed_seconds)
-    now = initial_time + elapsed_timedelta
-    timestamp = f"{now.year:04d}{now.month:02d}{now.day:02d}_{now.hour:02d}{now.minute:02d}{now.second:02d}"
-
     accel_data = []
 
     print("waiting for switch press")
@@ -78,14 +70,15 @@ while True:
     syncpin.value = not syncpin.value
 
     pixel.fill((0, 255, 255))
-    print(f"writing acceleration data to {timestamp}.txt")
+    print(f"writing acceleration data to accel_{fileid}.txt")
     try:
-        with open(f"/accel_{timestamp}.txt", "w+") as fp:
+        with open(f"/accel_{fileid}.txt", "w+") as fp:
             for i in accel_data:
                 print(i)
                 fp.write(f'{i[0]:.2f}, {i[1]:.2f}, {i[2]:.2f}\n')
                 fp.flush()
         pixel.fill((0, 255, 0))
+        fileid += 1
 
     except OSError:
         pixel.fill((255, 255, 255))
