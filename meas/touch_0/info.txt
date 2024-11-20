@@ -1,3 +1,3 @@
 scope fs = 100k
 accel fs = 8k/32
-t = 2.5 s (approx.)
+t_accel = 6 s (approx.)
