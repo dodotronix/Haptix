@@ -7,9 +7,13 @@ close all
 pkg load signal
 
 accel_motor = load("motor_moving_up/accel_0.txt");
-accel = load("touch_0/accel_0.txt");
 force = load("motor_moving_up/force_145241.txt");
+
+accel = load("touch_0/accel_0.txt");
 tforce = load("touch_0/force_144032.txt");
+
+%accel = load("touch_1_amp_21kohm_500ms_100ksmp_2V/accel_0.txt");
+%tforce = load("touch_1_amp_21kohm_500ms_100ksmp_2V/force_161508.txt");
 
 accel_mz = accel_motor(1:1500, 3);
 accel_z = accel(1:1500, 3);
