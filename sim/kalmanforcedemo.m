@@ -31,14 +31,38 @@ subplot(2, 1, 2)
 plot(accel)
 grid on
 
+sigma_a = 0.1; %m*s^2
+
+F = []
+
+G = []
+
+Q = []
+
+H = []
+
+R = []
+
+I = eye(2)
 
 
+% initialization
+u_n = [0; 0; 0] % acceleration vector
+x_00 = [0; 0; 0]
+P_00 = diag([0, 0, 0])
+
+x_n = F*x_00 + G*u_n
+P_n = F*P_00*F' + Q
+
+
+% output variables
+est_f = zeros(1, length(x));
 
 
 ##for i = 1:length(x)
 ##
 ##  % measurement
-##  z = [x(i); y(i)]
+##  z = [force(i); accel(i, 1); accel(i, 2), accel(i, 3)]
 ##
 ##  % update
 ##  K = P_n*H'*inv(H*P_n*H' + R)
@@ -49,7 +73,7 @@ grid on
 ##  est_y(i) = x_n(4);
 ##
 ##  % prediction
-##  x_n = F*x_n
+##  x_n = F*x_n + G*u_n
 ##  P_n = F*P_n*F' + Q
 ##
 ##
