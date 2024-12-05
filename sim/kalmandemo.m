@@ -21,7 +21,7 @@ y = [-401.46, -375.44, -346.15, -320.2, -300.08, -274.12, -253.45, ...
 dt = 1;
 
 sigma_a = 0.2; %m/s^2
-sigma_x_m = 3; %m
+sigma_x_m = 4; %m
 sigma_y_m = sigma_x_m;
 
 
@@ -79,22 +79,13 @@ for i = 1:length(x)
 
 end
 
-A = F;
-B = zeros(6);
-C = eye(6);
-D = 0;
-
-sys = ss(A,B,C,D);
-
-[kalmf, g, x] = kalman(sys,Q,R);
 
 
-
-%figure;
-%plot(x, y, '-x')
-%hold on
-%plot(est_x, est_y, '-o')
-%xlabel("x position [m]")
-%ylabel("y position [m]")
-%grid on
+figure;
+plot(x, y, '-x')
+hold on
+plot(est_x, est_y, '-o')
+xlabel("x position [m]")
+ylabel("y position [m]")
+grid on
 
