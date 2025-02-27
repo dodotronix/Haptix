@@ -80,7 +80,6 @@ for i = 1:length(x)
 end
 
 
-
 figure;
 plot(x, y, '-x')
 hold on

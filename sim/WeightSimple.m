@@ -5,13 +5,21 @@ close all
 pkg load control
 pkg load signal
 
-force_s = load("touching_10ksmp_2V_5s_61kohm/force_152849.txt");
-force_s = force_s(69800:3e5);
+f = 10;
+vibmag = 5;
 
-test = detrend(force_s, 2);
-new_s = [];
+
+#force_s = load("defined_weight_1.6846_1V_0.5s_21kohm/force_154237.txt");
+force_s = load("defined_weight_1.6846_1V_1s_61kohm/force_154043.txt");
+force_s = force_s(1:5:end);
+
+dc_offset = 78;
+f = movmedian(force_s-dc_offset, 200);
 
 reading = 0;
+test = f;
+new_s = [];
+
 for i = 1:length(test)
   if(reading == 0)
     reading = test(i);
@@ -23,6 +31,7 @@ for i = 1:length(test)
 
   new_s(i) = reading;
 end
+
 
 new_s_abs = abs(new_s);
 envelope_s = [];
@@ -36,15 +45,9 @@ end
 
 
 figure;
-plot(force_s)
-grid on
-
-figure;
-plot(test)
-grid on
-
-figure;
+subplot(2, 1, 1)
 plot(new_s)
-hold on
-plot(envelope_s)
+grid on
+subplot(2, 1, 2)
+plot(new_s_abs-0.5)
 grid on
