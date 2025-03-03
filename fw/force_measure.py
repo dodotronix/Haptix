@@ -44,31 +44,37 @@ def get_wave_data(inst):
     log.info(f"Memory size: {number_of_data}")
     log.info(f"Sampling rate: {sampling_rate}")
 
-    inst.write("WAV:MODE RAW")
-    inst.write("WAV:FORM BYTE")
-    inst.write("WAV:SOUR CHAN1")
-    __wait_until_complete()
+    data = np.zeros((number_of_data, 4))
 
-    start = 1
-    d = b''
-    test = np.array([])
-    for i in range(packets):
-        end = int(start + points_per_packet-1)
-        if end > number_of_data:
-            end = number_of_data
-        log.info(f"start: {start}, end: {end}")
-        inst.write(f"WAV:STAR {start}")
-        inst.write(f"WAV:STOP {end}")
-        inst.write(f"WAV:DATA?")
-        start = end + 1
-        d = inst.read_raw()
-        header_length = int(d[1:2])
-        num_bytes = int(d[2:2+header_length])
-        waveform_data = d[2+header_length:2+header_length+num_bytes]
-        waveform_array = np.frombuffer(waveform_data, dtype=np.uint8)
-        test = np.append(test, waveform_array)
+    for ch in range (1, 5):
+        inst.write("WAV:MODE RAW")
+        inst.write("WAV:FORM BYTE")
+        inst.write(f"WAV:SOUR CHAN{ch}")
+        __wait_until_complete()
 
-    data = test
+        log.info(f"Downloading from channel {ch}")
+
+        start = 1
+        d = b''
+        test = np.array([])
+        for i in range(packets):
+            end = int(start + points_per_packet-1)
+            if end > number_of_data:
+                end = number_of_data
+            log.info(f"start: {start}, end: {end}")
+            inst.write(f"WAV:STAR {start}")
+            inst.write(f"WAV:STOP {end}")
+            inst.write(f"WAV:DATA?")
+            start = end + 1
+            d = inst.read_raw()
+            header_length = int(d[1:2])
+            num_bytes = int(d[2:2+header_length])
+            waveform_data = d[2+header_length:2+header_length+num_bytes]
+            waveform_array = np.frombuffer(waveform_data, dtype=np.uint8)
+            test = np.append(test, waveform_array)
+
+        data[:,ch-1] = test
+
     return data
 
 def setup(inst, amp, timescale, memsize, trig):
@@ -81,19 +87,21 @@ def setup(inst, amp, timescale, memsize, trig):
     __wait_until_complete()
 
     inst.write("CHAN1:DISP ON")
-    __wait_until_complete()
-
+    inst.write("CHAN2:DISP ON")
+    inst.write("CHAN3:DISP ON")
     inst.write("CHAN4:DISP ON")
     __wait_until_complete()
 
     inst.write("CHAN1:PROB 1")
-    __wait_until_complete()
+    inst.write("CHAN2:PROB 1")
+    inst.write("CHAN3:PROB 1")
     inst.write("CHAN4:PROB 1")
     __wait_until_complete()
 
-    inst.write(f"CHAN1:SCAL {amp/8}") # vertical - 8 grid parts
-    __wait_until_complete()
-    inst.write(f"CHAN4:SCAL {amp/8}") # vertical - 8 grid parts
+    inst.write(f"CHAN1:SCAL {amp/4}") # vertical - 8 grid parts
+    inst.write(f"CHAN2:SCAL {amp/20}") # vertical - 8 grid parts
+    inst.write(f"CHAN3:SCAL {amp/20}") # vertical - 8 grid parts
+    inst.write(f"CHAN4:SCAL {amp/20}") # vertical - 8 grid parts
     __wait_until_complete()
 
     inst.write(f"TIM:MAIN:SCAL {timescale}") # time in ms
@@ -102,23 +110,24 @@ def setup(inst, amp, timescale, memsize, trig):
     __wait_until_complete()
 
     inst.write(f"ACQ:MDEP {memsize}")
+    inst.write(f"CHAN1:OFFS {2*amp/4}")
+    inst.write(f"CHAN2:OFFS {amp/20}")
+    inst.write(f"CHAN3:OFFS {amp/20}") 
+    inst.write(f"CHAN4:OFFS {amp/20}")
     __wait_until_complete()
 
-    # set trigger
     inst.write(f"TRIG:EDG:SOUR CHAN4") # trigger source
     inst.write(f"TRIG:EDG:LEV {trig}") # trigger level
     inst.write(f"TRIG:EDG:SLOP POS") # rising edge
     __wait_until_complete()
 
-    inst.write(f"CHAN1:OFFS {-3*amp/8}")
-    __wait_until_complete()
 
 def close(inst):
     inst.close()
 
 if __name__ == '__main__':
     # memory size is defined by the rigol datasheet
-    memdepths = [6000, 60000, 600000, 6000000, 12000000]
+    memdepths = [3000, 30000, 300000, 3000000, 6000000]
 
     rigol_addr = "10.0.0.14"
     pyvisa_addr = f"TCPIP0::{rigol_addr}::INSTR"
@@ -131,7 +140,7 @@ if __name__ == '__main__':
     # 0.2 s/timescale
     # memory size
     # 1.5 V trigger 
-    setup(inst, 16, 0.5, memdepths[2], 1.5)
+    setup(inst, 0.8, 0.5, memdepths[2], 1.5)
     log.info("Start program")
 
     try:
@@ -146,7 +155,10 @@ if __name__ == '__main__':
             log.info("Done")
 
             # preview
-            plot.plot(force)
+            plot.plot(force[:,0])
+            plot.plot(force[:,1])
+            plot.plot(force[:,2])
+            plot.plot(force[:,3])
             plot.title("Channel samples [-]")
             plot.ylabel("Amplitude [-]")
             plot.grid()
