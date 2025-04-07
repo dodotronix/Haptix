@@ -80,7 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.logger = lg.getLogger(__name__)
         self.threadpool = QtCore.QThreadPool()
 
-        self.size = 1000
+        self.size = 8000
         self.data = np.zeros((self.size, 1))
 
         # Application name
@@ -132,7 +132,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_chart(self, data):
         self.data = np.vstack((data.reshape(-1, 1), self.data[:-len(data)]))
         self.graph.setData(self.data.flatten())
-        self.logger.info("Updating regular chart")
 
 class Analyzer:
 
@@ -163,8 +162,6 @@ class Analyzer:
         sys.exit(self.app.exec())
 
     def fetch(self):
-        self.logger.info("Fetching data")
-        sleep(0.1)
         return np.random.randint(2**10, size=10)
 
     def wait_for_data(self):
