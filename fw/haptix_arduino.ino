@@ -1,6 +1,5 @@
 #include <Adafruit_MCP3008.h>
 
-#define MCP3008_SPI_FREQ 4000000
 #define BUFFER_SIZE 600
 
 Adafruit_MCP3008 adc;
@@ -16,7 +15,7 @@ void setup() {
   TCCR1A = 0;           // Init Timer1A
   TCCR1B = 0;           // Init Timer1B
   TCCR1B |= B00000001;  // Prescaler = 1
-  TCNT1 = 64735;        // Timer Preloading
+  TCNT1 = 63135;        // Timer Preloading
   TIMSK1 |= B00000001;  // Enable Timer Overflow Interrupt
   sei();             // enable all interrupts
 
@@ -24,17 +23,19 @@ void setup() {
   while (!Serial);
 
   Serial.println("Haptix test\n");
-  adc.begin();
+  adc.begin(10);
 }
 
 ISR(TIMER1_OVF_vect){
-  TCNT1 = 64735; // Timer Preloading
+  TCNT1 = 63135; // Timer Preloading
   if(!done) trigger = 1;
 }
 
 void loop() {
   if(trigger && !done) {
     trigger = 0;
+    adc.readADC(1);
+    adc.readADC(2);
     test[cnt++] = adc.readADC(0);
     if(cnt >= BUFFER_SIZE){
       cnt = 0;
