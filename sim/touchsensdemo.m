@@ -7,6 +7,7 @@ pkg load signal
 
 force_s = load("touching_10ksmp_2V_5s_61kohm/force_152849.txt");
 force_s = force_s(69800:3e5);
+t = [0:length(force_s)-1]/10e3;
 
 test = detrend(force_s, 2);
 new_s = [];
@@ -36,7 +37,7 @@ end
 
 
 figure;
-plot(force_s)
+plot(t, force_s)
 grid on
 
 figure;
