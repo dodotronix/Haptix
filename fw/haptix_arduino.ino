@@ -43,6 +43,8 @@ void loop() {
     }
   }
 
+  // TODO implement the LMS algorithm
+
   if(done) {
     for(int i=0; i<BUFFER_SIZE; ++i){
         Serial.println(test[i]); //Serial.print("\t");
