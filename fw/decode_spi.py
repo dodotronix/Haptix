@@ -48,9 +48,12 @@ if hdwf.value == 0:
 
 # SET Voltage
 # set up analog IO channel V+
+print("Power supply setup")
 dwf.FDwfAnalogIOChannelNodeSet(hdwf, c_int(0), c_int(0), c_double(1)) 
+dwf.FDwfAnalogIOChannelNodeSet(hdwf, c_int(1), c_int(0), c_double(1)) 
 # set voltage to 5 V
 dwf.FDwfAnalogIOChannelNodeSet(hdwf, c_int(0), c_int(1), c_double(5.0)) 
+dwf.FDwfAnalogIOChannelNodeSet(hdwf, c_int(1), c_int(1), c_double(-5.0)) 
 # enable voltage
 dwf.FDwfAnalogIOEnableSet(hdwf, c_int(1))
 
@@ -68,7 +71,7 @@ dwf.FDwfAnalogOutConfigure(hdwf, channel, c_int(1))
 
 nSamples = 100000 # 100MiB, ~12Mi of 8bit SPI
 rgbSamples = (c_uint8*nSamples)()
-nWords = 200
+nWords = 4000
 
 idxClk = 0 # DIO-0
 idxMiso = 1 # DIO-1
@@ -104,6 +107,8 @@ def info(decoded_data):
     if decoded_data:
         tmp = [f"0x{n:02x}" for n in decoded_data] 
         return ', '.join(tmp)
+
+print("Start acquisition")
 
 # wait for acquisition
 while True:
@@ -159,13 +164,22 @@ while True:
            (len(channels[2]) == nWords)):
        break 
 
+dwf.FDwfDeviceClose(hdwf)
+
 channels = np.array(channels).T
 
-plt.plot(channels, marker='o')
+plt.plot(channels, marker='')
 plt.title("Visualization of SPI received data")
 plt.xlabel("Sample Index [-]")
 plt.ylabel("ADC value [-]")
 plt.grid(True)
 plt.show()
 
-dwf.FDwfDeviceClose(hdwf)
+# Save the data to csv for post-processing
+np.savetxt("channels.csv", 
+           channels,
+           delimiter=",", 
+           header="Force,accelX,accelY", 
+           comments='',
+           fmt='%.4f')
+
