@@ -105,9 +105,9 @@ void butter_push(BF_t *filter) {
     }
 
     // update ema, ema2 and var
-    filter->ema = ALPHA*(result) - (1 - ALPHA)*(filter->ema);
+    filter->ema = ALPHA*(result) + (1 - ALPHA)*(filter->ema);
     printf("EMA: %f\n", filter->ema);
-    filter->ema2 = BETA*(result*result) - (1 - BETA)*(filter->ema2);
+    filter->ema2 = BETA*(result*result) + (1 - BETA)*(filter->ema2);
     printf("EMA2: %f\n", filter->ema2);
     filter->var = filter->ema2 - (filter->ema)*(filter->ema);
     printf("VAR: %f\n", filter->var);
@@ -118,10 +118,51 @@ void butter_push(BF_t *filter) {
     printf("filter out: %f\n\n", result);
 }
 
-// TODO kalman filter
-// TODO zero-score detection algorithm
+// TODO add a second sensor as parameter
+int adaptive_filter(BF_t *filter, float threshold, float alpha){
+
+    static float ema = 0; 
+    static float ema2 = 0; 
+    static float var = 0; 
+
+    // kalman constants
+    static float r = 10;
+    static float q = 1;
+
+    // kalman initial vars 
+    static float P = 0;
+    static float x_est = 0;
+
+    float sample = butter_get_nth(filter, 0);
+    printf("kalman P: %f\n", P);
+    printf("klaman in: %f\n", sample);
+
+    // prediction
+    float x_pred = x_est; 
+    float P_pred = P + q;
+
+    //update
+    float K = P_pred/(P_pred + r);
+    x_est = x_pred + K*(sample - x_pred);
+    P = (1 - K)*P_pred;
+    printf("klaman out: %f\n", x_est);
+
+    // zero-score detection
+    ema = alpha*x_est + (1 - alpha)*ema;
+    ema2 = alpha*(x_est*x_est) + (1 - alpha)*ema2;
+    var = ema2 - (ema*ema);
+    printf("kalman out EMA: %f\n", ema);
+    printf("kalman out EMA2: %f\n", ema2);
+    printf("kalman out VAR: %f\n", var);
+
+    if((x_est - ema)*(x_est - ema) > (threshold * var))
+        return 1;
+
+    return 0;
+}
 
 int main(){
+    int event = 0;
     // int virtual ADC
     adc_init(&channel1, dstream, ADC_DATA_LENGTH); 
 
@@ -129,8 +170,11 @@ int main(){
     butter_init(&my_filter, &channel1, 2);
 
     // simulate incoming data
-    for(int i=0; i<(ADC_DATA_LENGTH-OFFSET_MEAS_LENGTH); ++i)
+    for(int i=0; i<(ADC_DATA_LENGTH-OFFSET_MEAS_LENGTH); ++i){
         butter_push(&my_filter); 
+        event = adaptive_filter(&my_filter, 4, 0.01);
+        if(event) printf("EVENT DETECTED\n");
+    }
 
     return 0;
 }
