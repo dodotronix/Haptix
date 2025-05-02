@@ -6,6 +6,8 @@
 #define BUTTER_SIZE 2
 
 #define OFFSET_MEAS_LENGTH 2
+#define ALPHA 0.01f
+#define BETA 0.08f
 
 // simulation
 #define ADC_DATA_LENGTH 10
@@ -19,6 +21,10 @@ typedef struct {
     float in[BUFFER_SIZE];
     float out[BUFFER_SIZE];
     float offset;
+    float ema;
+    float ema2;
+    float var;
+    float gradient;
     // TODO this should be 
     // replaced by int 
     // channel on arduino
@@ -51,6 +57,10 @@ void butter_init(BF_t *filter, VirtADC_t *inst, unsigned char delay){
     filter->inst = inst;
     filter->offset = 0;
     filter->head = 0;
+    filter->ema = 0;
+    filter->ema2 = 0;
+    filter->var = 0;
+    filter->gradient = 0;
     filter->delay = delay;
     memset(filter->in, 0, sizeof(filter->in));
     memset(filter->out, 0, sizeof(filter->out));
@@ -94,9 +104,22 @@ void butter_push(BF_t *filter) {
         result -= a[i] * filter->out[idx];
     }
 
+    // update ema, ema2 and var
+    filter->ema = ALPHA*(result) - (1 - ALPHA)*(filter->ema);
+    printf("EMA: %f\n", filter->ema);
+    filter->ema2 = BETA*(result*result) - (1 - BETA)*(filter->ema2);
+    printf("EMA2: %f\n", filter->ema2);
+    filter->var = filter->ema2 - (filter->ema)*(filter->ema);
+    printf("VAR: %f\n", filter->var);
+    filter->gradient = result - butter_get_nth(filter, 2);
+    printf("gradient: %f\n", filter->gradient);
+
     filter->out[filter->head] = result;
     printf("filter out: %f\n\n", result);
 }
+
+// TODO kalman filter
+// TODO zero-score detection algorithm
 
 int main(){
     // int virtual ADC
