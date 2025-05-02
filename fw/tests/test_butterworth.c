@@ -5,9 +5,24 @@
 #define BUFFER_MASK (BUFFER_SIZE) - 1
 #define BUTTER_SIZE 2
 
+#define OFFSET_MEAS_LENGTH 2
+
+// simulation
+#define ADC_DATA_LENGTH 10
+
+typedef struct {
+    int data[ADC_DATA_LENGTH];
+    int index;
+} VirtADC_t;
+
 typedef struct {
     float in[BUFFER_SIZE];
     float out[BUFFER_SIZE];
+    float offset;
+    // TODO this should be 
+    // replaced by int 
+    // channel on arduino
+    VirtADC_t *inst; 
     unsigned char delay;
     unsigned char head;
 } BF_t; // input filter circular buffer
@@ -17,14 +32,38 @@ const float a[2] = {1.0f, 2.0f};
 const float b[2] = {3.0f, 4.0f};
 
 // simulated data stream
-float dstream[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+int dstream[ADC_DATA_LENGTH] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+VirtADC_t channel1;
 BF_t my_filter; 
 
-void butter_init(BF_t *filter, unsigned char delay){
-  filter->head = 0;
-  filter->delay = delay;
-  memset(filter->in, 0, sizeof(filter->in));
-  memset(filter->out, 0, sizeof(filter->out));
+void adc_init(VirtADC_t *inst, int *array, int num){
+    inst->index = 0;
+    for(int i=0; i<num; ++i)
+        inst->data[i] = array[i];
+}
+
+float get_adc_data(VirtADC_t *inst){
+    return inst->data[inst->index++];
+}
+
+void butter_init(BF_t *filter, VirtADC_t *inst, unsigned char delay){
+    filter->inst = inst;
+    filter->offset = 0;
+    filter->head = 0;
+    filter->delay = delay;
+    memset(filter->in, 0, sizeof(filter->in));
+    memset(filter->out, 0, sizeof(filter->out));
+
+    // calculate offset 
+#if OFFSET_MEAS_LENGTH
+    for(int i=0; i<OFFSET_MEAS_LENGTH; ++i)
+        // TODO here we going to wait for the trigger signal
+        filter->offset += (float)get_adc_data(filter->inst); 
+    filter->offset /= OFFSET_MEAS_LENGTH;
+#endif
+
+    printf("offset: %f\n", filter->offset);
 }
 
 float butter_get_nth(BF_t *filter, unsigned char n) {
@@ -33,10 +72,12 @@ float butter_get_nth(BF_t *filter, unsigned char n) {
 }
 
 // butterworth filter function 
-void butter_push(BF_t *filter, float value) {
+void butter_push(BF_t *filter) {
     // shift in the new value
     filter->head = (filter->head + 1) & BUFFER_MASK;
-    filter->in[filter->head] = value;
+    float obtained = (float)get_adc_data(filter->inst) - filter->offset;
+    filter->in[filter->head] = obtained;
+    printf("filter input: %f\n", filter->in[filter->head]);
 
     float result = 0; 
     //printf("%f\n", filter->in[0]);
@@ -54,19 +95,19 @@ void butter_push(BF_t *filter, float value) {
     }
 
     filter->out[filter->head] = result;
+    printf("filter out: %f\n\n", result);
 }
 
 int main(){
+    // int virtual ADC
+    adc_init(&channel1, dstream, ADC_DATA_LENGTH); 
 
     // init filter
-    butter_init(&my_filter, 0);
+    butter_init(&my_filter, &channel1, 2);
 
     // simulate incoming data
-    for(int i=0; i<10; ++i){
-        printf("filter input: %f\n", dstream[i]);
-        butter_push(&my_filter, dstream[i]); 
-        printf("filter out: %f\n\n", butter_get_nth(&my_filter, 0));
-    }
+    for(int i=0; i<(ADC_DATA_LENGTH-OFFSET_MEAS_LENGTH); ++i)
+        butter_push(&my_filter); 
 
     return 0;
 }
