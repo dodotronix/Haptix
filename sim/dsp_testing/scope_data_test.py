@@ -5,6 +5,8 @@ import padasip as pa
 from scipy.signal import filtfilt, lfilter, windows, medfilt, cont2discrete, butter
 
 force = np.loadtxt("../../meas/touching_10ksmp_2V_5s_61kohm/force_152849.txt")
+force = force[:-300000]
+print(force.shape)
 
 fs = 10e3
 Ts = 1/fs
@@ -22,6 +24,24 @@ t = np.linspace(0, len(force)*Ts, len(force))
 b, a = butter(2, (2*120/fs), 'low')
 force = filtfilt(b, a, force)
 
+#normalize
+force = force/np.max(np.abs(force))
+
+kalman_est = np.zeros(len(force))
+P = 0
+r = 100
+q = 0.05
+x_est = 0
+
+for n,f in enumerate(force):
+    # 1D kalman filter
+    x_pred = x_est
+
+    P_pred = P + q
+    K = P_pred/(P_pred + r)
+    x_est = x_pred + K*(f - x_pred)
+    P = (1 - K)*P_pred
+    kalman_est[n] = x_est
 
 def zero_score_detection(data, lag=1, threshold=0, alpha=0.1):
     signals = np.zeros(len(data))
@@ -46,18 +66,15 @@ def zero_score_detection(data, lag=1, threshold=0, alpha=0.1):
 
     return signals, avgFilter, stdFilter, filtered_data
 
-sigs, avgF, stdF, fdata = zero_score_detection(kalman_est, 200, 6, 0.008)
-
-
-
-
-
-#normalize
-force = force/np.max(np.abs(force))
+sigs, avgF, stdF, fdata = zero_score_detection(kalman_est, 600, 4, 0.008)
 
 plt.figure(0)
 plt.plot(t, force, label="scope signal")
-#plt.plot(t_scope, scope_filtered, label="filtered signal")
+plt.plot(t, fdata, label="filtered")
+plt.plot(t, avgF, label="avg")
+plt.plot(t, stdF, label="std")
+plt.plot(t, sigs-1, label="events")
+plt.plot(t, kalman_est, label="kalman")
 plt.legend(fontsize=16)
 plt.grid(True)
 
