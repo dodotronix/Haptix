@@ -4,10 +4,13 @@
 #define BUFFER_SIZE 8
 #define BUFFER_MASK (BUFFER_SIZE) - 1
 #define BUTTER_SIZE 2
+#define ZERO_SCORE_LAG 50
 
 #define OFFSET_MEAS_LENGTH 2
+
 #define ALPHA 0.01f
 #define BETA 0.08f
+#define GAMA 0.01f
 
 // simulation
 #define ADC_DATA_LENGTH 10
@@ -17,6 +20,7 @@ typedef struct {
     int index;
 } VirtADC_t;
 
+
 typedef struct {
     float in[BUFFER_SIZE];
     float out[BUFFER_SIZE];
@@ -25,6 +29,7 @@ typedef struct {
     float ema2;
     float var;
     float gradient;
+    float factor;
     // TODO this should be 
     // replaced by int 
     // channel on arduino
@@ -42,6 +47,7 @@ int dstream[ADC_DATA_LENGTH] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 VirtADC_t channel1;
 BF_t my_filter; 
+ZSD_t detector;
 
 void adc_init(VirtADC_t *inst, int *array, int num){
     inst->index = 0;
@@ -53,7 +59,8 @@ float get_adc_data(VirtADC_t *inst){
     return inst->data[inst->index++];
 }
 
-void butter_init(BF_t *filter, VirtADC_t *inst, unsigned char delay){
+void butter_init(BF_t *filter, VirtADC_t *inst, 
+                 unsigned char delay, float factor){
     filter->inst = inst;
     filter->offset = 0;
     filter->head = 0;
@@ -61,6 +68,7 @@ void butter_init(BF_t *filter, VirtADC_t *inst, unsigned char delay){
     filter->ema2 = 0;
     filter->var = 0;
     filter->gradient = 0;
+    filter->factor = factor;
     filter->delay = delay;
     memset(filter->in, 0, sizeof(filter->in));
     memset(filter->out, 0, sizeof(filter->out));
@@ -86,7 +94,7 @@ void butter_push(BF_t *filter) {
     // shift in the new value
     filter->head = (filter->head + 1) & BUFFER_MASK;
     float obtained = (float)get_adc_data(filter->inst) - filter->offset;
-    filter->in[filter->head] = obtained;
+    filter->in[filter->head] = filter->factor * obtained;
     printf("filter input: %f\n", filter->in[filter->head]);
 
     float result = 0; 
@@ -118,48 +126,79 @@ void butter_push(BF_t *filter) {
     printf("filter out: %f\n\n", result);
 }
 
-// TODO add a second sensor as parameter
-int adaptive_filter(BF_t *filter, float threshold, float alpha){
+void detector_init(ZSD_t *detector, float threshold){
+    detector->threshold = threshold;
+    detector->ema = 0;
+    detector->ready = 0;
+    detector->head = 0;
+    detector->avgFilter = 0;
+    detector->stdFilter = 0;
+    memset(detector->filtered, 0, sizeof(detector->filtered));
+}
 
-    static float ema = 0; 
-    static float ema2 = 0; 
-    static float var = 0; 
+int detector_update(ZSD_t *d, BF_t *f){
+    // fill the buffers with data first
+    float from_filter = butter_get_nth(f, 0);
+    float accept_band = d->threshold * d->stdFilter; 
+    float zero_score = from_filter - d->avgFilter;
+    
+    if(){
 
-    // kalman constants
-    static float r = 10;
-    static float q = 1;
+    } else {
 
-    // kalman initial vars 
-    static float P = 0;
-    static float x_est = 0;
+    }
 
-    float sample = butter_get_nth(filter, 0);
-    printf("kalman P: %f\n", P);
-    printf("klaman in: %f\n", sample);
-
-    // prediction
-    float x_pred = x_est; 
-    float P_pred = P + q;
-
-    //update
-    float K = P_pred/(P_pred + r);
-    x_est = x_pred + K*(sample - x_pred);
-    P = (1 - K)*P_pred;
-    printf("klaman out: %f\n", x_est);
-
-    // zero-score detection
-    ema = alpha*x_est + (1 - alpha)*ema;
-    ema2 = alpha*(x_est*x_est) + (1 - alpha)*ema2;
-    var = ema2 - (ema*ema);
-    printf("kalman out EMA: %f\n", ema);
-    printf("kalman out EMA2: %f\n", ema2);
-    printf("kalman out VAR: %f\n", var);
-
-    if((x_est - ema)*(x_est - ema) > (threshold * var))
-        return 1;
-
+    
     return 0;
 }
+
+
+
+// TODO add a second sensor as parameter
+//int adaptive_filter(BF_t *filter, float threshold){
+//
+//    static float ema = 0; 
+//    static float ema2 = 0; 
+//    static float var = 0; 
+//
+//    // kalman constants
+//    static float r = 10;
+//    static float q = 1;
+//
+//    // kalman initial vars 
+//    static float P = 0;
+//    static float x_est = 0;
+//
+//    static float avgFilter [10] = []; 
+//
+//    float sample = butter_get_nth(filter, 0);
+//    printf("kalman P: %f\n", P);
+//    printf("klaman in: %f\n", sample);
+//
+//    // prediction
+//    float x_pred = x_est; 
+//    float P_pred = P + q;
+//
+//    //update
+//    float K = P_pred/(P_pred + r);
+//    x_est = x_pred + K*(sample - x_pred);
+//    P = (1 - K)*P_pred;
+//    printf("klaman out: %f\n", x_est);
+//
+//    // zero-score detection
+//    ema = alpha*x_est + (1 - alpha)*ema;
+//    ema2 = alpha*(x_est*x_est) + (1 - alpha)*ema2;
+//    var = ema2 - (ema*ema);
+//    printf("kalman out EMA: %f\n", ema);
+//    printf("kalman out EMA2: %f\n", ema2);
+//    printf("kalman out VAR: %f\n\n", var);
+//
+//    // zero-score detection
+//    if(detector_update())
+//        return 1;
+//
+//    return 0;
+//}
 
 int main(){
     int event = 0;
@@ -167,13 +206,17 @@ int main(){
     adc_init(&channel1, dstream, ADC_DATA_LENGTH); 
 
     // init filter
-    butter_init(&my_filter, &channel1, 2);
+    butter_init(&my_filter, &channel1, 2, 0.6);
+
+    // init detector
+    detector_init(&detector, 3.5)
 
     // simulate incoming data
     for(int i=0; i<(ADC_DATA_LENGTH-OFFSET_MEAS_LENGTH); ++i){
         butter_push(&my_filter); 
-        event = adaptive_filter(&my_filter, 4, 0.01);
-        if(event) printf("EVENT DETECTED\n");
+        event = detector_update(&detector, &my_filter);
+        //event = adaptive_filter(&my_filter, 4, 0.01);
+        if(event) printf("EVENT DETECTED\n\n");
     }
 
     return 0;
