@@ -101,7 +101,7 @@ cBit = 0
 rgMosi = []
 rgMiso = []
 
-channels = [[], [], []]
+channels = [[], []] #, []]
 
 def info(decoded_data):
     if decoded_data:
@@ -131,14 +131,14 @@ while True:
                     channels[0].append(((rgMiso[1] & 0x07) << 8) | rgMiso[2])
                 if(rgMosi[1] ==  0x90):
                     channels[1].append(((rgMiso[1] & 0x07) << 8) | rgMiso[2])
-                if(rgMosi[1] ==  0xa0):
-                    channels[2].append(((rgMiso[1] & 0x07) << 8) | rgMiso[2])
+                # if(rgMosi[1] ==  0xa0):
+                #     channels[2].append(((rgMiso[1] & 0x07) << 8) | rgMiso[2])
             except:
                 pass
 
             if((len(channels[0]) == nWords) and \
-               (len(channels[1]) == nWords) and \
-                   (len(channels[2]) == nWords)):
+                   (len(channels[1]) == nWords)): 
+                #and (len(channels[2]) == nWords)):
                break 
 
             cBit, fsMosi, fsMiso = 0, 0, 0
@@ -160,8 +160,8 @@ while True:
                 fsMiso = 0
 
     if((len(channels[0]) == nWords) and \
-       (len(channels[1]) == nWords) and \
-           (len(channels[2]) == nWords)):
+           (len(channels[1]) == nWords)):
+        #and (len(channels[2]) == nWords)):
        break 
 
 dwf.FDwfDeviceClose(hdwf)
