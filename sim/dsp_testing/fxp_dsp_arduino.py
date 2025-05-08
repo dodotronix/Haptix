@@ -5,11 +5,13 @@ from scipy.signal import lfilter, filtfilt, butter
 
 #data = np.loadtxt("../../meas/table_setup/channels_500us_vibration_fz.csv", delimiter=',', skiprows=1)
 data = np.loadtxt("../../meas/table_setup/channels_500us_offset_vibration_fz.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_500us_offset_steep_fz.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_500us_simple_offset_fz.csv", delimiter=',', skiprows=1)
 
 Ts = 500e-6
 fs = 1/Ts
 
-b, a = butter(2, (2*150/fs), 'low')
+b, a = butter(2, (2*120/fs), 'low')
 print(a, b)
 
 def to_fxp(x, q):
@@ -67,27 +69,67 @@ force = np.concatenate((np.zeros(dly), force[:-dly]))
 force = force/(2**16)
 accel = accel/(2**16)
 
-# simple subtraction
-direct_sub = np.zeros(len(force))
-gradient_accel = np.zeros(len(force))
-for i in range(2, len(force)):
-    direct_sub[i] = (force[i] - accel[i])
-    gradient_accel[i] = accel[i] - accel[i-2]
-
 # EMA
-alpha = 0.01
+alpha = 0.2
 ema_force = np.zeros(len(force))
 ema_accel = np.zeros(len(accel))
+
 for i in range(1, len(force)):
     ema_force[i] = alpha*force[i-1] + (1-alpha)*ema_force[i-1]
     ema_accel[i] = alpha*accel[i-1] + (1-alpha)*ema_accel[i-1]
 
+pwr_force = np.zeros(len(force))
+pwr_accel = np.zeros(len(accel))
+pwr_delta = pwr_force - pwr_accel
+
+for i in range(8, len(force)):
+    pwr_force[i] = sum(force[i-8:i]**2)
+    pwr_accel[i] = sum(accel[i-8:i]**2)
+    pwr_delta[i] = pwr_force[i] - pwr_accel[i]
+
+# simple subtraction
+# TODO figure out, how you can better subtract the signals
+direct_sub = np.zeros(len(force))
+gradient_accel = np.zeros(len(force))
+
+mu = 3
+L = 4
+e = np.zeros(len(force))
+y = np.zeros(len(force))
+w = np.zeros((L, len(force)))
+
+for i in range(2, len(force)):
+    if((i+L) > len(force)):
+        break
+
+    gradient_accel[i] = accel[i] - accel[i-2]
+    direct_sub[i] = force[i] - accel[i]
+
+    #LMS
+    x = accel[i:i+L]
+    #x = np.concatenate((accel[i:i+L-1], ema_accel[i].flatten()))
+    y[i] = np.dot(w[:,i-1], x)
+    e[i] = (force[i-2] - y[i])
+    w[:, i] = w[:,i-1] + 2 * mu * e[i] * x
+
+    # LMS Arduino
+    #x[0] = accel[i]
+    #x[1] = accel[i-1]
+    #x[2] = accel[i-2]
+
+    #y[i] = w[0][i-1]*x[0] + w[1][i-1]*x[1] + w[2][i-1]*x[2]
+    #e[i] = force[i-2] - y[i]
+    #w[0, i] = w[0, i-1] + e[i] * x[0] * 2 * mu
+    #w[1, i] = w[1, i-1] + e[i] * x[1] * 2 * mu
+    #w[2, i] = w[2, i-1] + e[i] * x[2] * 2 * mu
+
 t = np.linspace(0, (len(force))*Ts, (len(force)))
 
 # zero-score detection for arduino
-beta = 0.04
-threshold = 6
-lag = 32
+beta = 0.08
+threshold = 3
+detector = 0.03
+lag = 64
 circ_buf = np.zeros(lag)
 head = 0
 
@@ -98,14 +140,18 @@ stdFilt_py = np.zeros(len(direct_sub))
 stdFilt = np.zeros(len(direct_sub))
 filtered = np.zeros(len(direct_sub))
 
-for i in range(1, len(direct_sub)-lag):
+input_signal = direct_sub
 
-    if np.abs(direct_sub[i] - avgFilt[i-1]) > (threshold * stdFilt[i-1]):
-        if direct_sub[i] > avgFilt[i - 1]:
+for i in range(1, len(input_signal)-lag):
+
+    if (np.abs(input_signal[i] - avgFilt[i-1]) > (threshold * np.sqrt(stdFilt[i-1]))) and (i > lag):
+        print(input_signal[i], avgFilt[i-1], threshold, stdFilt[i-1]*1e8)
+        events[i] = 0
+        if (input_signal[i] > avgFilt[i - 1]) and (input_signal[i] > detector):
             events[i] = 1
-        filtered[i] = alpha*direct_sub[i] + (1 - alpha)*filtered[i-1]
+        filtered[i] = beta*input_signal[i] + (1 - beta)*filtered[i-1]
     else:
-        filtered[i] = direct_sub[i]
+        filtered[i] = input_signal[i]
         events[i] = 0
 
     # circular buffer update
@@ -138,8 +184,7 @@ def zero_score_detection(data, lag=1, threshold=0, alpha=0.1):
 
     for i in range(lag, len(data)):
         if abs((data[i] - avgFilter[i-1])) > threshold * stdFilter[i-1]:
-            #print(data[i], avgFilter[i-1], threshold, stdFilter[i-1])
-            #print(data[i], avgFilter[i-1], threshold, stdFilter[i-1])
+            print(data[i], avgFilter[i-1], threshold, stdFilter[i-1])
             if data[i] > avgFilter[i-1]:
                 signals[i] = 1
             filtered_data[i] = alpha * data[i] + (1 - alpha) * filtered_data[i-1]
@@ -152,21 +197,33 @@ def zero_score_detection(data, lag=1, threshold=0, alpha=0.1):
 
     return signals, avgFilter, stdFilter, filtered_data
 
-sigs, avgF, stdF, fdata = zero_score_detection(direct_sub, lag, threshold, beta)
+sigs, avgF, stdF, fdata = zero_score_detection(input_signal, lag, threshold, beta)
 
 plt.figure(0)
+plt.subplot(2, 1, 1)
+plt.plot(t, force, label='force')
+plt.plot(t, accel, label='acceleration')
+plt.plot(t, ema_force, label='EMA force')
+plt.plot(t, ema_accel, label='EMA acceleration')
+plt.plot(t, accel - ema_accel, label='zero-score accel')
+plt.plot(t, force - ema_force, label='zero-score force')
+plt.plot(t, (force - ema_force) - (accel - ema_accel), label='zero-score delta')
+plt.legend(fontsize=16)
+plt.grid(True)
+plt.subplot(2, 1, 2)
 plt.plot(t, force, label='force')
 plt.plot(t, accel, label='acceleration')
 plt.plot(t, direct_sub, label='direct subtraction')
 plt.plot(t, gradient_accel, label='gradient')
-plt.plot(t, ema_force, label='EMA force')
-plt.plot(t, ema_accel, label='EMA acceleration')
+plt.plot(t, pwr_force, label="force power window")
+plt.plot(t, pwr_accel, label="accel power window")
+plt.plot(t, pwr_delta, "-o", label="power subtraction")
 plt.legend(fontsize=16)
 plt.grid(True)
 
 plt.figure(1)
 plt.plot(t, force, label='force')
-plt.plot(t, direct_sub, label='direct subtraction')
+plt.plot(t, input_signal, label='input signal')
 plt.plot(t, avgFilt, label='average')
 plt.plot(t, np.sqrt(stdFilt), label='stddev')
 plt.plot(t, filtered, label='filtered')
@@ -184,10 +241,19 @@ plt.plot(t, 0.2*sigs, label='events')
 plt.legend(fontsize=16)
 plt.grid(True)
 
-plt.figure(3)
-plt.plot(t, force_raw - 321, label='force')
-plt.plot(t, 0.525*(accel_raw - 162), label='acceleration')
-plt.legend(fontsize=16)
-plt.grid(True)
+#plt.figure(3)
+#plt.subplot(2, 1, 1)
+#plt.plot(t, force, label='force')
+#plt.plot(t, accel, label='accel')
+#plt.plot(t, direct_sub, label='direct subtraction')
+#plt.plot(t, e, label='error')
+#plt.plot(t, y, label='output')
+#plt.legend(fontsize=16)
+#plt.grid(True)
+#plt.subplot(2, 1, 2)
+#for i in range(w.shape[0]):
+#    plt.plot(t, w[i, :], label=f'w{i+1}')
+#plt.legend(fontsize=16)
+#plt.grid(True)
 
 plt.show()
