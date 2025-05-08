@@ -10,7 +10,7 @@ scope = np.loadtxt("../../meas/touching_10ksmp_2V_5s_61kohm/force_152849.txt")
 
 Ts = 150e-6
 fs = 1/Ts
-v = 0.7 #cm/s, peak lasts for (5.2ms -> 0.36um)
+v = 0.7 #cm/s, peak lasts for (5.2ms -> 364um)
 
 force = data[:,0]
 accel_z = data[:,1]
