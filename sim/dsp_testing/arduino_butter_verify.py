@@ -4,11 +4,12 @@ from scipy.signal import lfilter, butter, filtfilt
 Ts = 500e-6 # [s]
 fs = 1/Ts # [Hz]
 Q = 15
-#b, a = butter(2, (2*120/fs), 'low')
+
+b, a = butter(2, (2*120/fs), 'low')
 
 # dummy coeffs
-a = [1.0, 0.1, 0.01]
-b = [0.5, 0.05, 0.005]
+#a = [1.0, 0.1, 0.01]
+#b = [0.5, 0.05, 0.005]
 
 def to_fxp(x, q):
     if x == 1:
@@ -43,8 +44,8 @@ print(f"fxp signal offsetted: {[to_fxp(x, Q) for x in input_signal]}")
 input_shifted = input_signal
 
 # scaled data
-#k = 0.56
-k = 1
+#k = 1
+k = 0.56
 k_fxp = to_fxp(k, Q)
 print(f"factor: {k} -> {k_fxp} ")
 print(f"scaled signal: {k*input_shifted}")
