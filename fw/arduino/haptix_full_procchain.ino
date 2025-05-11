@@ -12,10 +12,15 @@
 #define BUFFER_MASK (BUFFER_SIZE) - 1
 #define OFFSET_MEAS_LENGTH 4 // i can go up to 16
 
-#define ZERO_SCORE_LAGS 4
 #define ZERO_SCORE_ALPHA 328 // 0.01
 #define ZERO_SCORE_NOISE  983 // 0.03
 #define ZERO_SCORE_THRES (4UL << Q)
+
+// needs to be power of 2
+#define ZERO_SCORE_LAGS 4
+// NOTE don't forget to change DIV, 
+// if you change the ZERO_SCORE_LAGS
+#define ZERO_SCORE_DIV 2
 
 #define FACTOR 18350 // 0.56
 // #define FACTOR 32767 // ~1
@@ -155,11 +160,11 @@ int detector_update( ZSD_t *d, int value){
     }
 
     // update average and variance
-    d->avg += ((d->filtered - last) >> 2); // NOTE don't forget to change it
+    d->avg += ((d->filtered - last) >> ZERO_SCORE_DIV);
     
     int a = d->filtered - last;
     int b = d->filtered - d->avg + last - last_avg;
-    d->var += fmul(a, b) >> 2;
+    d->var += fmul(a, b) >> ZERO_SCORE_DIV;
 
     // update circular buffer
     d->buffer[d->head] = d->filtered;
