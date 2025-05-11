@@ -19,9 +19,9 @@
 #include <stdlib.h>
 #include <Adafruit_MCP3008.h>
 
-// constants
-const int a[3] = {32767, 3277, 328};
-const int b[3] = {16384, 1638, 164};
+// constants (LPF freq. cutoff 120Hz)
+const int a[3] = {32767, -48349, 19232};
+const int b[3] = {913, 1826, 913};
 
 typedef struct {
     int in[BUFFER_SIZE];
