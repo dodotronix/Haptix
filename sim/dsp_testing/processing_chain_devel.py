@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import lfilter, filtfilt, butter
 
-#data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
-data = np.loadtxt("../../meas/table_setup/channels_simple_offset_fzx.csv", delimiter=',', skiprows=1)
+data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_simple_offset_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_steep_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
@@ -16,8 +16,9 @@ ALPHA = 328
 alpha = 0.01
 THRES = np.int32(4 << Q)
 noise = 983
-LAG = 4
-DIV = 2
+LAG = 8
+DIV = 3
+EXTEND = 2
 head = 0
 
 def to_fxp(x, q):
@@ -31,20 +32,15 @@ def list_to_fxp(x, q):
 def to_float(x, q):
     return x / (2**q)
 
-def list_to_float(x, q):
-    return np.array([to_float(i, q) for i in x])
-
 def fmul(a, b):
     tmp = a*b
     return (tmp + np.int32(1 << (Q-1))) >> Q
 
 def sqrt_q(x):
     if x > 255:
-        return to_fxp(np.sqrt(255 / (2 ** Q)), Q)
-    return to_fxp(np.sqrt(x / (2 ** Q)), Q)
-
-def sqrt_list_q(list):
-    return np.array([sqrt_q(x) for x in list])
+        print("LUT SQRT OVERFLOW")
+        return to_fxp(np.sqrt(255 / (2**(Q + 2*EXTEND + DIV))), Q)
+    return to_fxp(np.sqrt(x / (2**(Q + 2*EXTEND + DIV))), Q)
 
 b, a = butter(2, (2*120/fs), 'low')
 
@@ -81,6 +77,7 @@ sub = np.int32(filtered0 - filtered1)
 N = len(filtered0)
 wSum = np.zeros(N, dtype=np.int32)
 varSum = np.zeros(N, dtype=np.int32)
+stddev = np.zeros(N, dtype=np.int32)
 limit = np.zeros(N, dtype=np.int32)
 input = np.zeros(N, dtype=np.int32)
 events = np.zeros(N, dtype=np.int32)
@@ -119,7 +116,10 @@ for i in range(1, N):
     bb = filtered[i] - ((wSum[i] + wSum[i-1]) >> DIV) + circ_buf[head]
 
     print(f"aa: {aa}, bb: {bb}")
-    varSum[i] = varSum[i-1] + (fmul(aa << 4, bb << 4))
+    # NOTE don't forget that the varSum[i]
+    # has to be devided by number of LAG
+    varSum[i] = varSum[i-1] + (fmul(aa << EXTEND, bb << EXTEND))
+    stddev[i] = sqrt_q(varSum[i])
 
     if varSum[i] < 0:
         varSum[i] = 0;
@@ -136,7 +136,7 @@ for i in range(1, N):
         real_std[i] = np.std(tmp)
 
     print(f"avg: {wSum[i] >> DIV}, {real_mu[i]} -> {to_fxp(real_mu[i], Q)}")
-    print(f"var: {varSum[i]}, -> {varSum[i]/(2**Q)},  {real_var[i]} -> {to_fxp(real_var[i], Q)}")
+    print(f"var: {varSum[i]}, -> {varSum[i]/(2**(Q + 2*EXTEND + DIV))},  {real_var[i]} -> {to_fxp(real_var[i], Q)}")
     print("")
 
     circ_buf[head] = filtered[i]
@@ -150,18 +150,20 @@ plt.legend(fontsize=16)
 plt.grid(True)
 
 plt.figure(1)
-plt.plot(t, sub/(2**Q), label='subtraction')
+plt.plot(t, to_float(sub, Q), label='subtraction')
 
 plt.plot(t, real_mu, label='real average')
-plt.plot(t, wSum/(2**(Q + 2)), label="q average")
+# the wSum is just sum but needs to be devided by Window
+plt.plot(t, to_float(wSum, Q+DIV), label="q average")
 
-plt.plot(t, limit/(2**Q), label='limit', linestyle="--")
-plt.plot(t, input/(2**Q), label='input', linewidth=2)
+plt.plot(t, to_float(limit, Q), label='limit', linestyle="--")
+plt.plot(t, to_float(input, Q), label='input', linewidth=2)
 
-plt.plot(t, np.sqrt(varSum/(2**Q)), label="q std")
+plt.plot(t, np.sqrt((varSum/(2**(Q + 2*EXTEND + DIV)))), label="q std")
+plt.plot(t, to_float(stddev, Q), label="q std LUT")
 plt.plot(t, real_std, label='real std')
 
-plt.plot(t, filtered/(2**Q), label='filtered')
+plt.plot(t, to_float(filtered, Q), label='filtered')
 plt.plot(t, events, label='events')
 plt.legend(fontsize=16)
 plt.grid(True)
