@@ -12,15 +12,19 @@ Ts = 500e-6 # [s]
 fs = 1/Ts # [Hz]
 Q = 15
 Q_ONE = 32767
+
 ALPHA = 328
 alpha = 0.01
 THRES = np.int32(4 << Q)
 noise = 983
-LAG = 8
-DIV = 3
-EXTEND = 2
 head = 0
 
+# If you increase the LAG, be careful, because the values
+# to calculate variance get bigger, so decrease the EXTEND
+# size
+LAG = 64
+DIV = 6
+EXTEND = 2
 def to_fxp(x, q):
     if x == 1:
         return 2**q - 1
@@ -115,7 +119,7 @@ for i in range(1, N):
     wSum[i] = wSum[i-1] + aa
     bb = filtered[i] - ((wSum[i] + wSum[i-1]) >> DIV) + circ_buf[head]
 
-    print(f"aa: {aa}, bb: {bb}")
+    print(f"aa: {aa}, bb: {bb}, extended aa: {aa << EXTEND}, extended bb: {bb << EXTEND}")
     # NOTE don't forget that the varSum[i]
     # has to be devided by number of LAG
     varSum[i] = varSum[i-1] + (fmul(aa << EXTEND, bb << EXTEND))
