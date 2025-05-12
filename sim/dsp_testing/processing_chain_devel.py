@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import lfilter, filtfilt, butter
 
-data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_simple_offset_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_steep_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_fzx.csv", delimiter=',', skiprows=1)
-#data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
+data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
 
 Ts = 500e-6 # [s]
 fs = 1/Ts # [Hz]
@@ -19,12 +19,10 @@ THRES = np.int32(4 << Q)
 noise = 983
 head = 0
 
-# If you increase the LAG, be careful, because the values
-# to calculate variance get bigger, so decrease the EXTEND
-# size
-LAG = 64
-DIV = 6
+LAG = 32
+DIV = 5
 EXTEND = 2
+
 def to_fxp(x, q):
     if x == 1:
         return 2**q - 1
@@ -123,10 +121,15 @@ for i in range(1, N):
     # NOTE don't forget that the varSum[i]
     # has to be devided by number of LAG
     varSum[i] = varSum[i-1] + (fmul(aa << EXTEND, bb << EXTEND))
-    stddev[i] = sqrt_q(varSum[i])
 
+    # important to limit the values to 0,
+    # since there might be miss matches
+    # in the calculations caused by the
+    # finite precision of fxp numbers
     if varSum[i] < 0:
         varSum[i] = 0;
+
+    stddev[i] = sqrt_q(varSum[i])
 
     if(i < LAG):
         tmp = np.concatenate((np.zeros(LAG-(i+1)), filtered_float[:i+1]))
