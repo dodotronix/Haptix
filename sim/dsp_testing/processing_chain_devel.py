@@ -50,6 +50,9 @@ b_fxp = list_to_fxp(b, Q)
 a_fxp = list_to_fxp(a, Q)
 print(b_fxp, a_fxp)
 
+# print sqrt LUT table
+print([sqrt_q(x) for x in range(256)])
+
 # measured data from each channel traformed to Q1.15 format
 measured0 = np.zeros(len(data))
 measured1 = np.zeros(len(data))
@@ -68,7 +71,6 @@ K_FXP = to_fxp(K, Q)
 scaled0 = np.concatenate((np.zeros(DLY), measured0[OFFSET_N:-DLY] - offset0))
 scaled1 = K_FXP*(measured1[OFFSET_N:] - offset1) / (2**Q)
 t = np.linspace(0, len(scaled1)*Ts, len(scaled1))
-print(scaled1)
 
 # filter data
 filtered0 = lfilter(b_fxp, a_fxp, scaled0)
