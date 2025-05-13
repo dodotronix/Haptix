@@ -111,9 +111,10 @@ for i in range(1, N):
 
     if ((input[i] > limit[i]) and (limit[i] > 0)):
         events[i] = 0
-        ema_a = fmul(ALPHA, sub[i])
-        ema_b = fmul(Q_ONE - ALPHA, filtered[i - 1])
-        filtered[i] = ema_a + ema_b
+
+        ema_a = sub[i] - filtered[i - 1]
+        ema_b = ALPHA
+        filtered[i] = filtered[i-1] + fmul(ema_b, ema_a)
         filtered_float[i] = (alpha*fdata[i]) + (1 - alpha)*filtered_float[i-1]
 
         if (sub[i] > (wSum[i - 1] >> DIV)) and (sub[i] > noise):
