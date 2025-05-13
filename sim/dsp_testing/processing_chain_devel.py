@@ -21,7 +21,7 @@ head = 0
 
 LAG = 32
 DIV = 5
-EXTEND = 2
+EXTEND = 3
 
 def to_fxp(x, q):
     if x == 1:
@@ -35,8 +35,18 @@ def to_float(x, q):
     return x / (2**q)
 
 def fmul(a, b):
-    tmp = a*b
-    return (tmp + np.int32(1 << (Q-1))) >> Q
+    tmp = (a*b)
+    # symmetrical rounding
+    tmp += np.where(tmp >= 0, (1 << (Q - 1)), -(1 << (Q - 1)))
+
+    # when the number is negative and it
+    # it can reach 0 using bit shift
+    # we have to force it with this
+    # condition
+    if(tmp < 0 and not((abs(tmp) >> Q))):
+        return 0
+
+    return (tmp >> Q)
 
 def sqrt_q(x):
     if x > 255:
