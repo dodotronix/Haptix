@@ -2,13 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import lfilter, filtfilt, butter
 
-#data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
-#data = np.loadtxt("../../meas/table_setup/channels_simple_offset_fzx.csv", delimiter=',', skiprows=1)
-#data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_steep_fzx.csv", delimiter=',', skiprows=1)
-data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_fzx.csv", delimiter=',', skiprows=1)
-#data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
+#data = np.loadtxt("../../meas/table_setup/channels_471us_double_vibration_fz.csv", delimiter=',', skiprows=2)
+#data = np.loadtxt("../../meas/table_setup/channels_470us_offset_vibration_fz.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_470us_grinder_simul_fz.csv", delimiter=',', skiprows=1)
+data = np.loadtxt("../../meas/table_setup/channels_470us_simple_offset_fz.csv", delimiter=',', skiprows=1)
 
-Ts = 500e-6 # [s]
+Ts = 470e-6 # [s]
 fs = 1/Ts # [Hz]
 Q = 15
 Q_ONE = 32767
