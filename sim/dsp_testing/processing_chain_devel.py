@@ -5,23 +5,25 @@ from scipy.signal import lfilter, filtfilt, butter
 #data = np.loadtxt("../../meas/table_setup/channels_simple_vibration_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_simple_offset_fzx.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_steep_fzx.csv", delimiter=',', skiprows=1)
-#data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_fzx.csv", delimiter=',', skiprows=1)
-data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
+data = np.loadtxt("../../meas/table_setup/channels_offset_vibration_fzx.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_simple_offset_drift_fzx.csv", delimiter=',', skiprows=2)
 
 Ts = 500e-6 # [s]
 fs = 1/Ts # [Hz]
 Q = 15
 Q_ONE = 32767
 
+OFFSET = 656 # 0.02
 ALPHA = 328
 alpha = 0.01
-THRES = np.int32(4 << Q)
+THRES = np.int32(2 << Q)
+PRECISION = 8
 noise = 983
 head = 0
 
-LAG = 32
-DIV = 5
-EXTEND = 3
+LAG = 64
+DIV = 6
+EXTEND = 2
 
 def to_fxp(x, q):
     if x == 1:
@@ -38,30 +40,46 @@ def fmul(a, b):
     tmp = (a*b)
     # symmetrical rounding
     tmp += np.where(tmp >= 0, (1 << (Q - 1)), -(1 << (Q - 1)))
+    print(a, b, tmp)
 
     # when the number is negative and it
     # it can reach 0 using bit shift
     # we have to force it with this
     # condition
-    if(tmp < 0 and not((abs(tmp) >> Q))):
-        return 0
+    if (tmp < 0) and not (abs(tmp) >> Q):
+        tmp = 0
 
-    return (tmp >> Q)
+    tmp = tmp >> Q
+
+    print(f"result: {tmp}")
+
+    # saturation
+    if tmp > Q_ONE:
+        return Q_ONE
+    elif tmp < -(Q_ONE + 1):
+        return -(Q_ONE + 1)
+
+    return tmp
+
+lut_sqrt = np.array([np.sqrt(x/(2**(Q + 2*EXTEND + DIV - PRECISION))) for x in range(256)])
+lut = np.array([to_fxp(x, Q) for x in lut_sqrt])
 
 def sqrt_q(x):
-    if x > 255:
+    # bit shift defines the precision
+    # of the values in the table
+    index = x >> PRECISION
+
+    if index > 255:
         print("LUT SQRT OVERFLOW")
-        return to_fxp(np.sqrt(255 / (2**(Q + 2*EXTEND + DIV))), Q)
-    return to_fxp(np.sqrt(x / (2**(Q + 2*EXTEND + DIV))), Q)
+        index = 255
+
+    return lut[index]
 
 b, a = butter(2, (2*120/fs), 'low')
 
 b_fxp = list_to_fxp(b, Q)
 a_fxp = list_to_fxp(a, Q)
 print(b_fxp, a_fxp)
-
-# print sqrt LUT table
-print([sqrt_q(x) for x in range(256)])
 
 # measured data from each channel traformed to Q1.15 format
 measured0 = np.zeros(len(data))
@@ -87,8 +105,12 @@ filtered0 = lfilter(b_fxp, a_fxp, scaled0)
 filtered1 = lfilter(b_fxp, a_fxp, scaled1)
 sub = np.int32(filtered0 - filtered1)
 
+# DEBUGGING
+#sub = sub[800:810]
+#print(sub)
+
 # simulate reading
-N = len(filtered0)
+N = len(sub)
 wSum = np.zeros(N, dtype=np.int32)
 varSum = np.zeros(N, dtype=np.int32)
 stddev = np.zeros(N, dtype=np.int32)
@@ -106,21 +128,19 @@ filtered_float = np.zeros(N)
 fdata = sub / (2 ** Q)
 
 for i in range(1, N):
+    print(f"value: {sub[i-1]}")
     limit[i] = fmul(THRES, sqrt_q(varSum[i-1]))
-    input[i] = np.abs(sub[i] - (wSum[i-1] >> DIV))
+    input[i] = np.abs(sub[i-1] - (wSum[i-1] >> DIV))
+    print(f"limit: {limit[i]}, input: {input[i]}")
 
-    if ((input[i] > limit[i]) and (limit[i] > 0)):
-        events[i] = 0
-
-        ema_a = sub[i] - filtered[i - 1]
-        ema_b = ALPHA
-        filtered[i] = filtered[i-1] + fmul(ema_b, ema_a)
+    if ((input[i] > limit[i])):
+        delta = sub[i-1] - filtered[i - 1]
+        filtered[i] = filtered[i-1] + fmul(ALPHA, delta)
         filtered_float[i] = (alpha*fdata[i]) + (1 - alpha)*filtered_float[i-1]
-
-        if (sub[i] > (wSum[i - 1] >> DIV)) and (sub[i] > noise):
+        if (sub[i-1] > (wSum[i-1] >> DIV)) and (sub[i-1] > OFFSET):
             events[i] = 1
     else:
-        filtered[i] = sub[i]
+        filtered[i] = sub[i-1]
         filtered_float[i] = fdata[i]
         events[i] = 0
 
@@ -131,8 +151,10 @@ for i in range(1, N):
     bb = filtered[i] - ((wSum[i] + wSum[i-1]) >> DIV) + circ_buf[head]
 
     print(f"aa: {aa}, bb: {bb}, extended aa: {aa << EXTEND}, extended bb: {bb << EXTEND}")
+
     # NOTE don't forget that the varSum[i]
     # has to be devided by number of LAG
+    print(f"fmul var: {(fmul(aa << EXTEND, bb << EXTEND))}")
     varSum[i] = varSum[i-1] + (fmul(aa << EXTEND, bb << EXTEND))
 
     # important to limit the values to 0,
@@ -155,12 +177,16 @@ for i in range(1, N):
         real_var[i] = np.var(tmp)
         real_std[i] = np.std(tmp)
 
+    print(f"filtered: {filtered[i]}")
     print(f"avg: {wSum[i] >> DIV}, {real_mu[i]} -> {to_fxp(real_mu[i], Q)}")
     print(f"var: {varSum[i]}, -> {varSum[i]/(2**(Q + 2*EXTEND + DIV))},  {real_var[i]} -> {to_fxp(real_var[i], Q)}")
+    print(f"stddev: {sqrt_q(varSum[i])}, {real_std[i]} -> {to_fxp(real_std[i], Q)}")
     print("")
 
     circ_buf[head] = filtered[i]
     head = (head + 1) & (LAG - 1)
+
+print(f"LUT: {lut}")
 
 plt.figure(0)
 plt.plot(t, filtered0, label='force')
