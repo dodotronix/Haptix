@@ -1,3 +1,8 @@
+// 1) start the digilent analog discovery power supply +-5V 
+// 2) don't forget to check, if all the grounds have shortest
+// track to the AD3 extension board with BENC connectors
+// 3) run the program
+//
 #define YELLOW 6
 #define BLUE 7
 #define TIMER_PERIOD 58015 // Ts = 470us
