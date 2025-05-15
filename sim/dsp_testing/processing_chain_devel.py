@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.signal import lfilter, filtfilt, butter
 
 #data = np.loadtxt("../../meas/table_setup/channels_470us_double_vibration_fz.csv", delimiter=',', skiprows=2)
-#data = np.loadtxt("../../meas/table_setup/channels_470us_offset_vibration_fz.csv", delimiter=',', skiprows=1)
+data = np.loadtxt("../../meas/table_setup/channels_470us_offset_vibration_fz.csv", delimiter=',', skiprows=1)
 #data = np.loadtxt("../../meas/table_setup/channels_470us_grinder_simul_fz.csv", delimiter=',', skiprows=1)
-data = np.loadtxt("../../meas/table_setup/channels_470us_simple_offset_fz.csv", delimiter=',', skiprows=1)
+#data = np.loadtxt("../../meas/table_setup/channels_470us_simple_offset_fz.csv", delimiter=',', skiprows=1)
 
 Ts = 470e-6 # [s]
 fs = 1/Ts # [Hz]
@@ -17,23 +17,23 @@ def to_fxp(x, q):
 
 Q = 15
 Q_ONE = 32767
-ADC_RESOLUTION = 9
+ADC_RESOLUTION = 8
 
 OFFSET_N = 4
 LIMIT_OFFSET = 200
-NOISE = 2620 # 0.02
+NOISE = 1000 # 0.02
 alpha = 0.08
 ALPHA = to_fxp(alpha, Q)
 THRES = np.int32(2 << Q)
-PRECISION = 6
+PRECISION = 7
 head = 0
 
 LAG = 64
 DIV = 6
-EXTEND = 2
+EXTEND = 1
 
-DLY = 3
-K = 0.62
+DLY = 6
+K = 0.57
 K_FXP = to_fxp(K, Q)
 
 def list_to_fxp(x, q):
@@ -81,7 +81,7 @@ def sqrt_q(x):
 
     return lut[index]
 
-b, a = butter(2, (2*120/fs), 'low')
+b, a = butter(2, (2*30/fs), 'low')
 
 b_fxp = list_to_fxp(b, Q)
 a_fxp = list_to_fxp(a, Q)
@@ -99,6 +99,7 @@ offset1 = np.mean(measured1[:OFFSET_N])
 
 scaled0 = np.concatenate((np.zeros(DLY, dtype=np.int32), measured0[OFFSET_N:-DLY] - offset0))
 scaled1 = np.zeros(len(measured1[OFFSET_N:]), dtype=np.int32)
+
 for i in range(OFFSET_N, len(scaled1)):
     tmp = np.int32(measured1[i] - offset1)
     scaled1[i] = fmul(K_FXP, tmp)
