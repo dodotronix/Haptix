@@ -7,6 +7,7 @@
 #define OFFSET_MEAS_LENGTH 4 // i can go up to 16
 
 #define Q 15 
+#define ONE_Q 32767
 #define ADC_WIDTH 10
 #define TO_FLOAT( x ) ( ( (float)x ) / ( 1UL << Q ) )
 #define ADC_TO_Q115( x ) ( (x - 512) << (Q - ADC_WIDTH) )
@@ -20,8 +21,8 @@
 #define DATA_LENGTH 12
 
 // constants
-const int a[3] = {32767, 3277, 328};
-const int b[3] = {16384, 1638, 164};
+const int32_t a[3] = {32767, -49354, 19856};
+const int32_t b[3] = {817, 1635, 817};
 
 typedef struct {
     int in[BUFFER_SIZE];
@@ -43,15 +44,40 @@ int get_adc_data(int *index, int *data) {
 // than one up to certain extend
 // this is intended to be used 
 // in the detector function
-int fmul(uint32_t a, int b){
+int fmul(int32_t a, int16_t b){
   Serial.print("input a: ");
-  Serial.println(a);
+  Serial.print(a);
+  Serial.print(", ");
   Serial.print("input b: ");
-  Serial.println(b);
-  // TODO add missing overflow exception
-  uint32_t tmp = (a*b + (1UL << (Q-1)));
-  return (int)(tmp >> Q);
+  Serial.print(b);
+  Serial.print(", ");
+ 
+  int32_t tmp = a*b;
+  tmp += (tmp >= 0) ? (1 << (Q - 1)) : -(1 << (Q - 1));
+
+  Serial.print("tmp: ");
+  Serial.println(tmp);
+
+  // NOTE: due to the C/C++ signed/unsigned type implementation 
+  // shifting negative number will never reach 0 but always -1, 
+  // therefore we have to check the condition manually, by
+  // checking the abs() of the vaule
+  if(!(abs(tmp) >> Q)) {
+    return 0;
+  }
+
+  tmp >>= Q;
+
+  // saturation
+  if (tmp > ONE_Q) {
+    return (int) ONE_Q;
+  } else if (tmp < -(ONE_Q + 1)) {
+    return (int) -(ONE_Q + 1);
+  }
+
+  return (int)tmp;
 }
+
 
 void butter_init(BF_t *filter, int offset, int factor, uint8_t dly){
     filter->head = 0;
@@ -87,7 +113,7 @@ void butter_push(BF_t *filter, int value) {
     Serial.print("filter in: ");
     Serial.println(filter->in[filter->head]);
 
-    uint32_t result = 0; 
+    int32_t result = 0; 
     for (int i = 0; i < BUTTER_SIZE; ++i) {
         int idx = (filter->head - filter->dly - i) & BUFFER_MASK;
         result += fmul(b[i], filter->in[idx]);
@@ -113,7 +139,7 @@ BF_t sensor;
 int trigger = 1; // for tests, we don't have to wait for timer
 
 void setup() {
-  uint32_t offset = 0;
+  int32_t offset = 0;
   int tmp;
 
   // initialize console
@@ -140,7 +166,7 @@ void setup() {
   Serial.println((int)offset);
 
   // initialize buffer with 2nd order butterworth filter 
-  butter_init(&sensor, (int)offset, FACTOR, 0);
+  butter_init(&sensor, 0, FACTOR, 0);
 }
 
 void loop() {
