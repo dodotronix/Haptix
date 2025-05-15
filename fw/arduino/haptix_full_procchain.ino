@@ -16,11 +16,11 @@
 #define BUFFER_SIZE 8
 #define BUFFER_MASK (BUFFER_SIZE) - 1
 #define OFFSET_MEAS_LENGTH 4 // i can go up to 16
-#define DLY 3
+#define DLY 6
 
 #define ZERO_SCORE_EXTEND 2
 #define ZERO_SCORE_ALPHA 2621 // 0.08
-#define ZERO_SCORE_NOISE  2620 // 0.08
+#define ZERO_SCORE_NOISE  800 // 0.025
 #define ZERO_SCORE_THRES (2UL << Q)
 #define ZERO_SCORE_OFFSET 200
 
@@ -30,20 +30,21 @@
 
 // needs to be power of 2
 #define ZERO_SCORE_LAGS 64
+
 // NOTE don't forget to change DIV, 
 // if you change the ZERO_SCORE_LAGS
 #define ZERO_SCORE_DIV 6
 
-#define FACTOR 20316 // 0.62
+#define FACTOR 18678 // 0.57
 // #define FACTOR 32767 // ~1
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <Adafruit_MCP3008.h>
 
-// constants (LPF freq. cutoff 120Hz)
-const int32_t a[3] = {32767, -48349, 19232};
-const int32_t b[3] = {913, 1826, 913};
+// constants (LPF freq. cutoff 30Hz)
+const int32_t a[3] = {32767, -61435, 28909};
+const int32_t b[3] = {60, 121, 60};
 
 typedef struct {
     int in[BUFFER_SIZE];
