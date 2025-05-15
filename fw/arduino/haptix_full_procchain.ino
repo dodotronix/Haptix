@@ -2,26 +2,31 @@
 // 2) don't forget to check, if all the grounds have shortest
 // track to the AD3 extension board with BENC connectors
 // 3) run the program
-//
+
 #define YELLOW 6
 #define BLUE 7
 #define TIMER_PERIOD 58015 // Ts = 470us
 
 #define Q 15 
 #define ONE_Q 32767
-#define ADC_WIDTH 10
+#define ADC_WIDTH 9 // NOTE multiply your signal by pow2
 #define ADC_TO_Q115( x ) ( (x - 512) << (Q - ADC_WIDTH) )
 
 #define BUTTER_SIZE 3
 #define BUFFER_SIZE 8
 #define BUFFER_MASK (BUFFER_SIZE) - 1
 #define OFFSET_MEAS_LENGTH 4 // i can go up to 16
+#define DLY 3
 
 #define ZERO_SCORE_EXTEND 2
-#define ZERO_SCORE_ALPHA 328 // 0.01
-#define ZERO_SCORE_NOISE  983 // 0.03
-#define ZERO_SCORE_THRES (4UL << Q)
-#define SQRT_PRECISION 8
+#define ZERO_SCORE_ALPHA 2621 // 0.08
+#define ZERO_SCORE_NOISE  2620 // 0.08
+#define ZERO_SCORE_THRES (2UL << Q)
+#define ZERO_SCORE_OFFSET 200
+
+// this defines the conversion steps of the sqrt if
+// you change it, you have to regenerate the LUT
+#define SQRT_PRECISION 6
 
 // needs to be power of 2
 #define ZERO_SCORE_LAGS 64
@@ -29,7 +34,7 @@
 // if you change the ZERO_SCORE_LAGS
 #define ZERO_SCORE_DIV 6
 
-#define FACTOR 18350 // 0.56
+#define FACTOR 20316 // 0.62
 // #define FACTOR 32767 // ~1
 
 #include <stdio.h>
@@ -37,8 +42,8 @@
 #include <Adafruit_MCP3008.h>
 
 // constants (LPF freq. cutoff 120Hz)
-const int a[3] = {32767, -48349, 19232};
-const int b[3] = {913, 1826, 913};
+const int32_t a[3] = {32767, -48349, 19232};
+const int32_t b[3] = {913, 1826, 913};
 
 typedef struct {
     int in[BUFFER_SIZE];
@@ -59,28 +64,32 @@ typedef struct {
 
 // input format q1.(15 + 2*EXTEND + DIV - PRECISION) -> sqrt() -> q1.15
 int sqrt_lut [256] = {
-  0, 91, 128, 157, 181, 202, 222, 239, 256, 272, 286, 300,
-  314, 326, 339, 351, 362, 373, 384, 395, 405, 415, 425, 434,
-  443, 453, 462, 470, 479, 487, 496, 504, 512, 520, 528, 535,
-  543, 551, 558, 565, 572, 580, 587, 594, 600, 607, 614, 621,
-  627, 634, 640, 646, 653, 659, 665, 671, 677, 683, 689, 695,
-  701, 707, 713, 718, 724, 730, 735, 741, 746, 752, 757, 763,
-  768, 773, 779, 784, 789, 794, 799, 804, 810, 815, 820, 825,
-  830, 834, 839, 844, 849, 854, 859, 863, 868, 873, 878, 882,
-  887, 891, 896, 901, 905, 910, 914, 919, 923, 927, 932, 936,
-   941, 945,  949,   954,  958,  962,  966,  971,  975,  979,  983,  987,
-   991,  996, 1000, 1004, 1008, 1012, 1016, 1020, 1024, 1028, 1032, 1036,
-  1040, 1044, 1048, 1052, 1056, 1059, 1063, 1067, 1071, 1075, 1079, 1082,
-  1086, 1090, 1094, 1097, 1101, 1105, 1109, 1112, 1116, 1120, 1123, 1127,
-  1130, 1134, 1138, 1141, 1145, 1148, 1152, 1156, 1159, 1163, 1166, 1170,
-  1173, 1177, 1180, 1184, 1187, 1190, 1194, 1197, 1201, 1204, 1208, 1211,
-  1214, 1218, 1221, 1224, 1228, 1231, 1234, 1238, 1241, 1244, 1248, 1251,
-  1254, 1257, 1261, 1264, 1267, 1270, 1274, 1277, 1280, 1283, 1286, 1290,
-  1293, 1296, 1299, 1302, 1305, 1308, 1312, 1315, 1318, 1321, 1324, 1327,
-  1330, 1333, 1336, 1339, 1342, 1346, 1349, 1352, 1355, 1358, 1361, 1364,
-  1367, 1370, 1373, 1376, 1379, 1382, 1385, 1387, 1390, 1393, 1396, 1399,
-  1402, 1405, 1408, 1411, 1414, 1417, 1420, 1422, 1425, 1428, 1431, 1434,
-  1437, 1440, 1442, 1445
+    0,  45,  64,  78,  91, 101, 111, 120, 128, 136,
+  143, 150, 157, 163, 169, 175, 181, 187, 192, 197,
+  202, 207, 212, 217, 222, 226, 231, 235, 239, 244,
+  248, 252, 256, 260, 264, 268, 272, 275, 279, 283,
+  286, 290, 293, 297, 300, 304, 307, 310, 314, 317,
+  320, 323, 326, 329, 333, 336, 339, 342, 345, 348,
+  351, 353, 356, 359, 362, 365, 368, 370, 373, 376,
+  379, 381, 384, 387, 389, 392, 395, 397, 400, 402,
+  405, 407, 410, 412, 415, 417, 420, 422, 425, 427,
+  429, 432, 434, 436, 439, 441, 443, 446, 448, 450,
+  453, 455, 457, 459, 462, 464, 466, 468, 470, 472,
+  475, 477, 479, 481, 483, 485, 487, 490, 492, 494,
+  496, 498, 500, 502, 504, 506, 508, 510, 512, 514,
+  516, 518, 520, 522, 524, 526, 528, 530, 532, 534,
+  535, 537, 539, 541, 543, 545, 547, 549, 551, 552,
+  554, 556, 558, 560, 562, 563, 565, 567, 569, 571,
+  572, 574, 576, 578, 580, 581, 583, 585, 587, 588,
+  590, 592, 594, 595, 597, 599, 600, 602, 604, 605,
+  607, 609, 611, 612, 614, 616, 617, 619, 621, 622,
+  624, 625, 627, 629, 630, 632, 634, 635, 637, 638,
+  640, 642, 643, 645, 646, 648, 650, 651, 653, 654,
+  656, 657, 659, 660, 662, 664, 665, 667, 668, 670,
+  671, 673, 674, 676, 677, 679, 680, 682, 683, 685,
+  686, 688, 689, 691, 692, 694, 695, 697, 698, 700,
+  701, 703, 704, 705, 707, 708, 710, 711, 713, 714,
+  716, 717, 718, 720, 721, 723
 };
 
 int fsqrt(int x){
@@ -138,7 +147,7 @@ int butter_push(BF_t *filter, int value) {
     int obtained = value - filter->offset;
     filter->in[filter->head] = fmul(filter->factor, obtained);
 
-    uint32_t result = 0; 
+    int result = 0; 
     for (int i = 0; i < BUTTER_SIZE; ++i) {
         int idx = (filter->head - filter->dly - i) & BUFFER_MASK;
         result += fmul(b[i], filter->in[idx]);
@@ -161,21 +170,26 @@ void detector_init(ZSD_t *d){
     memset(d->buffer, 0, sizeof(d->buffer));
 }
 
-int detector_update( ZSD_t *d, int value){
-    int event = 0;
+void detector_update( ZSD_t *d, int *event, int value){
 
     // classification
     int input = abs(value - (d->avg >> ZERO_SCORE_DIV));
-    int limit = fmul(ZERO_SCORE_THRES, fsqrt(d->var));
+    int limit = fmul(ZERO_SCORE_THRES, fsqrt(d->var)) + ZERO_SCORE_OFFSET;
 
-    if ((input > limit) && (limit > 0)){
+    if (input > limit){
       d->filtered += fmul(ZERO_SCORE_ALPHA, (value - d->filtered));
 
-      if ((value > (d->avg >> ZERO_SCORE_DIV)) && (value > ZERO_SCORE_NOISE))
-        event = 1;
+      if ((value > (d->avg >> ZERO_SCORE_DIV)) && (input > ZERO_SCORE_NOISE) && !(*event))
+        *event = 1;
 
     } else {
        d->filtered = value;
+
+       // NOTE since it's a demo, we use 
+       // static value to reset the event 
+       // variable
+       if((value < 1000) && (*event)) 
+         *event = 0;
     }
 
     // save previous states before updating
@@ -195,21 +209,19 @@ int detector_update( ZSD_t *d, int value){
     // update circular buffer
     d->buffer[d->head] = d->filtered;
     d->head = (d->head + 1) & (ZERO_SCORE_LAGS - 1);
-
-    return event;
 }
 
 Adafruit_MCP3008 adc;
 volatile uint8_t trigger = 0;
 int measured[2] = {0, 0};
-int signal, event, active;
+int signal, event;
 BF_t force, accel;
 ZSD_t detector;
 
 void setup() {
 
-  uint32_t offset[2] = {0, 0};
-  active = 0;
+  int32_t offset[2] = {0, 0};
+  event = 0;
 
   cli();
   TCCR1A = 0;           // Init Timer1A
@@ -254,7 +266,7 @@ void setup() {
 
   // initialize input buffer
   Serial.println("[INFO] Initialize Butterworth filter");
-  butter_init(&force, (int)offset[0], ONE_Q, 3);
+  butter_init(&force, (int)offset[0], ONE_Q, DLY);
   butter_init(&accel, (int)offset[1], FACTOR, 0);
 
   // initialize edge detector
@@ -279,17 +291,15 @@ void loop() {
     // processing chain
     signal = butter_push(&force, ADC_TO_Q115(measured[0]));
     signal -= butter_push(&accel, ADC_TO_Q115(measured[1]));
-    event = detector_update(&detector, signal);
+    detector_update(&detector, &event, signal);
 
     // toggle active state until the 
     // signal sinks close to the zero 
-    //if(event && !active) active = 1;
-    //else if(abs(signal) < 10) active = 0; 
-    if(signal > 300) active = 1;
-    else active = 0;
+    // if(signal > 100) event = 1;
+    // else event = 0;
 
     // activate indicator
-    if(active) digitalWrite(BLUE, HIGH);
+    if(event) digitalWrite(BLUE, HIGH);
     else digitalWrite(BLUE, LOW);
 
     digitalWrite(YELLOW, LOW);
