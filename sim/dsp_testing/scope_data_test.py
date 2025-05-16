@@ -4,8 +4,10 @@ import padasip as pa
 
 from scipy.signal import filtfilt, lfilter, windows, medfilt, cont2discrete, butter
 
-force = np.loadtxt("../../meas/touching_10ksmp_2V_5s_61kohm/force_152849.txt")
+#force = np.loadtxt("../../meas/touching_10ksmp_2V_5s_61kohm/force_152849.txt")
 #force = np.loadtxt("../../meas/defined_weight_1.6846_1V_0.5s_21kohm/force_154237.txt")
+force = np.loadtxt("../../meas/defined_weight_1.6846_1V_1s_61kohm/force_154043.txt")
+
 force = force[:-300000]
 print(force.shape)
 
